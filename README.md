@@ -21,4 +21,5 @@
 | chgrp | 改变文件所属组                  |
 | umask | 文件创建屏蔽码                  |
   
-![系统or用户打开表结构图.png](https://i0.hdslb.com/bfs/album/4909cd5cb42187ccb2645cb3d2935628a4a2ee6a.png)
+![系统or用户打开表结构图.png](https://i0.hdslb.com/bfs/album/4909cd5cb42187ccb2645cb3d2935628a4a2ee6a.png)  
+![磁盘划分](https://i0.hdslb.com/bfs/album/fad0938c31208bb6187f9c2d75372908ad315b3d.png)  
