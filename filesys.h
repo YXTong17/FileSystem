@@ -72,6 +72,7 @@ struct User {
     struct OFD OFD[OPEN_NUM];   //用户打开文件表
 };
 
+/* 用户组 */
 struct Group {
     struct User user[GROUP_USER_NUM];   //每个组最多5个用户
     unsigned short group_id;     //用户组ID
