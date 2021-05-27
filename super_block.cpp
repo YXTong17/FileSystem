@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesys.h>
 using namespace std;
 /*
 struct SuperBlock {
@@ -28,8 +29,8 @@ public:
     vector<int> SUPER_BLOCK;
 
     DISK_ALLOCATE(){
-        MAX_BLOCK = 20;
-        BLOCK_MAX_LENGTH = 7;
+        MAX_BLOCK = FILE_BLK;
+        BLOCK_MAX_LENGTH = NICFREE;
         for(int i = MAX_BLOCK; i>0; i--){
             vector<int> block_place_holder;
             BLOCK.push_back(block_place_holder);
@@ -88,6 +89,22 @@ public:
         cout<<endl;
     }
 
+    void free_all(){
+        for(int i = disk.MAX_BLOCK; i>0; i--){
+            disk.free_block(i);
+            //cout<<disk.SUPER_BLOCK[disk.SUPER_BLOCK[0]]<<"->";
+            disk.show_super_block();
+        }
+    }
+
+    void allocate_all(){
+        for(int i = disk.MAX_BLOCK; i>0; i--){
+            cout<<disk.SUPER_BLOCK[disk.SUPER_BLOCK[0]]<<"<-";
+            vector<int> block = disk.allocate_block();
+            disk.show_super_block();
+        }
+    }
+
 };
 
 int main()
@@ -96,15 +113,8 @@ int main()
     DISK_ALLOCATE disk;
     disk.show_super_block();
 
-    for(int i = disk.MAX_BLOCK; i>0; i--){
-        disk.free_block(i);
-        cout<<disk.SUPER_BLOCK[disk.SUPER_BLOCK[0]]<<"->";
-        disk.show_super_block();
-    }
+    disk.free_all();
     cout<<"****************"<<endl;
-    for(int i = disk.MAX_BLOCK; i>0; i--){
-        cout<<disk.SUPER_BLOCK[disk.SUPER_BLOCK[0]]<<"<-";
-        vector<int> block = disk.allocate_block();
-        disk.show_super_block();
-    }
+    disk.allocate_all();
+
 }
