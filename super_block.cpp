@@ -2,7 +2,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <filesys.h>
+//#include <filesys.h>
+
+#define FILE_BLK 20     //共有128K个物理块,占用128MB
+#define NICFREE 7          //超级块中空闲块数组的最大块数
+
+
 using namespace std;
 /*
 struct SuperBlock {
@@ -90,18 +95,18 @@ public:
     }
 
     void free_all(){
-        for(int i = disk.MAX_BLOCK; i>0; i--){
-            disk.free_block(i);
-            //cout<<disk.SUPER_BLOCK[disk.SUPER_BLOCK[0]]<<"->";
-            //disk.show_super_block();
+        for(int i = MAX_BLOCK ; i>0; i--){
+            free_block(i);
+            //cout<<SUPER_BLOCK[SUPER_BLOCK[0]]<<"->";
+            //show_super_block();
         }
     }
 
     void allocate_all(){
-        for(int i = disk.MAX_BLOCK; i>0; i--){
-            //cout<<disk.SUPER_BLOCK[disk.SUPER_BLOCK[0]]<<"<-";
-            vector<int> block = disk.allocate_block();
-            //disk.show_super_block();
+        for(int i = MAX_BLOCK; i>0; i--){
+            //cout<<SUPER_BLOCK[SUPER_BLOCK[0]]<<"<-";
+            vector<int> block = allocate_block();
+            //show_super_block();
         }
     }
 
