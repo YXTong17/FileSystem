@@ -101,7 +101,6 @@ extern int user_count = 0;  //用户数
 extern int group_count = 0; //用户组数
 extern struct SuperBlock super_block;   //超级块
 
-
 void creat_disk();
 
 #endif //FILESYSTEM_FILESYS_H
