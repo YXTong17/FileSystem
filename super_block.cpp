@@ -93,15 +93,15 @@ public:
         for(int i = disk.MAX_BLOCK; i>0; i--){
             disk.free_block(i);
             //cout<<disk.SUPER_BLOCK[disk.SUPER_BLOCK[0]]<<"->";
-            disk.show_super_block();
+            //disk.show_super_block();
         }
     }
 
     void allocate_all(){
         for(int i = disk.MAX_BLOCK; i>0; i--){
-            cout<<disk.SUPER_BLOCK[disk.SUPER_BLOCK[0]]<<"<-";
+            //cout<<disk.SUPER_BLOCK[disk.SUPER_BLOCK[0]]<<"<-";
             vector<int> block = disk.allocate_block();
-            disk.show_super_block();
+            //disk.show_super_block();
         }
     }
 
