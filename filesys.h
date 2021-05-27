@@ -1,6 +1,8 @@
 #ifndef FILESYSTEM_FILESYS_H
 #define FILESYSTEM_FILESYS_H
 
+using namespace std;
+
 #define BLOCK_SIZE 1024     //每块大小1KB
 #define SYS_OPEN_FILE 40    //系统打开文件表最大项数
 #define DIR_NUM 128         //每个目录所包含的最大目录项数（文件数）
