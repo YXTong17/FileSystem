@@ -5,7 +5,7 @@
 #define SYS_OPEN_FILE 40    //系统打开文件表最大项数
 #define DIR_NUM 128         //每个目录所包含的最大目录项数（文件数）
 #define F_N_SIZE 20         //每个文件名所占字节数，另加i节点号4个字节
-#define ADDR_N 11           //每个i节点指向的物理地址，前8个直接:8KB，第19一次间址:256KB，第10二次间址:64MB，第11三次间址:16GB
+#define ADDR_N 9           //每个i节点指向的物理地址，前8个直接:8KB，第19一次间址:256KB，第10二次间址:64MB，第11三次间址:16GB
 #define DINODE_SIZE 64      //每个磁盘i节点所占字节
 #define DINODE_BLK 8192     //所有磁盘i节点共占8192个物理块
 #define FILE_BLK 131072     //共有128K个物理块,占用128MB
@@ -19,10 +19,11 @@
 
 /* 磁盘i节点 64B 每个磁盘块16个节点 */
 struct DINode {
-    unsigned short owner;       //该文件拥有者的id
+    unsigned short owner;       //该文件所有者的id
+    unsigned short group;       //该文件的组的id
     unsigned short file_type;   //0:正规文件 1:目录文件 2:特别文件
-    unsigned short mode;        //存取权限
-    unsigned int addr[ADDR_N];  //文件物理地址，前8个直接:8KB，第19一次间址:256KB，第10二次间址:64MB，第11三次间址:16GB
+    unsigned short mode;        //rwx r-x r-x 所有者权限+组权限+其他人权限
+    unsigned int addr[ADDR_N];  //文件物理地址，前6个直接:6KB，第7一次间址:256KB，第8二次间址:64MB，第9三次间址:16GB
     unsigned int block_num;     //文件所使用的磁盘块的实际数目
     unsigned int file_size;     //文件大小
     unsigned short link_count;  //文件链接计数
@@ -37,9 +38,10 @@ struct INode {
     //文件所属文件系统的逻辑设备号
     //链接指针：指向空闲链表和散列队列
     unsigned short owner;       //该文件拥有者的id
+    unsigned short group;       //该文件的组的id
     unsigned short file_type;   //0:正规文件 1:目录文件 2:特别文件
     char mode;                  //存取权限
-    unsigned int addr[ADDR_N];  //文件物理地址，前7个直接，第8一次间址，第9二次间址，第10三次间址
+    unsigned int addr[ADDR_N];  //文件物理地址，前6个直接:6KB，第7一次间址:256KB，第8二次间址:64MB，第9三次间址:16GB
     unsigned int block_num;     //文件所使用的磁盘块的实际数目
     unsigned int file_size;     //文件长度
     unsigned short link_count;  //文件链接计数
@@ -88,5 +90,7 @@ struct SuperBlock {
 extern struct INode sys_open_file[SYS_OPEN_FILE];   //系统打开文件表
 extern struct User user[USER_NUM];      //用户表
 extern struct SuperBlock super_block;   //超级块
+
+void creat_disk();
 
 #endif //FILESYSTEM_FILESYS_H
