@@ -19,4 +19,4 @@
 | chgrp | 改变文件所属组                  |
 | umask | 文件创建屏蔽码                  |
   
-![系统or用户打开表结构图.png](https://i.loli.net/2021/05/27/TApDrmMqgwibIxJ.png)
+![系统or用户打开表结构图.png](https://www.hualigs.cn/image/60af506e341e5.jpg)
