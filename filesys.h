@@ -233,6 +233,7 @@ extern int user_count;                  //用户数
 extern int group_count;                 //用户组数
 //extern struct SuperBlock super_block;   //超级块
 extern char disk_buf[DISK_BUF][BLOCK_SIZE]; //磁盘缓冲区
+extern int tag[DISK_BUF];               //每块磁盘缓冲区的tag
 extern DISK_ALLOCATE disk;
 extern unsigned short cur_user;         //当前用户ID
 extern unsigned short umod;             //默认权限码，默认644，目录644+111=755
@@ -240,5 +241,11 @@ extern unsigned short umod;             //默认权限码，默认644，目录64
 void creat_disk();
 
 unsigned int creat_directory();
+
+void init_buf(); //初始化缓冲区
+
+void disk_read(char *buf, int id); //把id磁盘块读到用户自定义的buf
+
+void disk_write(char *buf, int id);//把buf内容写到磁盘的id块
 
 #endif //FILESYSTEM_FILESYS_H
