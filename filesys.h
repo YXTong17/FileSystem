@@ -1,8 +1,9 @@
 #ifndef FILESYSTEM_FILESYS_H
 #define FILESYSTEM_FILESYS_H
 
+#include <iostream>
+#include <fstream>
 #include <bitset>
-#include <regex>
 #include <string>
 #include <vector>
 
