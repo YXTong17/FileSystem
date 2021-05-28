@@ -76,6 +76,12 @@ void read_from(int k,int id){ //把id磁盘块的内容读到第k个缓冲块
 
 }
 
+void all_write_back(){
+    for(int i=0;i<DISK_BUF;i++){
+        write_back(i);
+    }
+}
+
 int get_empty(){
     //目前暂时全部把第0块作为置换块
     write_back(0); //把第0块写回磁盘的tag[0]块
