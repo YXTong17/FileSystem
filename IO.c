@@ -2,11 +2,19 @@
 // Created by time on 2021/5/27.
 //
 #include "filesys.h"
-#include <stdio.h>
+#include <cstdio>
+
+
+
+void read(char *buf, int k);
+void write(const char *buf,int k);
+int get_empty();
+void read_from(int k,int id);
+void write_back(int k);
 
 void init_buf(){
-    for(int i=0;i<DISK_BUF;i++){
-        tag[i]=-1;
+    for(int & i : tag){
+        i=-1;
     }
 }
 
@@ -22,7 +30,6 @@ void disk_read(char *buf,int id){ //把id磁盘块读到用户自定义的buf
     read_from(k,id); //把磁盘的第id块写入到缓冲区的第k块
     tag[k]=id;
     read(buf,k);
-    return ;
 }
 
 void disk_write(char *buf,int id){
@@ -34,8 +41,7 @@ void disk_write(char *buf,int id){
     //运行到这里表示没有缓冲块对应id物理块，那么就置换1块缓冲块
     int k=get_empty();
     tag[k]=id;
-    write(buf,k); //把buf内容写到k缓冲块中
-    return;
+    write(buf,k);
 }
 
 void read(char *buf, int k){ //把k缓冲块的内容读到buf中
@@ -44,25 +50,22 @@ void read(char *buf, int k){ //把k缓冲块的内容读到buf中
         buf[i]=p[i];
     }
 }
-void write(char *buf,int k){ //把buf内容写到k缓冲块中
+void write(const char *buf,int k){ //把buf内容写到k缓冲块中
     char *p=disk_buf[k];
     for(int i=0;i<BLOCK_SIZE;i++){
         p[i]=buf[i];
     }
 }
 
-int write_back(int k){ //把第k缓冲块写回磁盘的tag[k]块,若错误则返回-1，否则返回1
-    if (k>=0){
-        int id=tag[k];
-        if(id<0)
-            return -1;
-        FILE* f=fopen("disk","w");
-        fseek(f,id*BLOCK_SIZE,0);
-        char *p1=DISK_BUF[k];
-        fwrite(p1,BLOCK_SIZE,1,f);
-        fclose(f);
+void write_back(int k){ //把第k缓冲块写回磁盘的tag[k]块,若错误则返回-1，否则返回1
+    int id=tag[k];
+    if(id<0)
         return ;
-    }
+    FILE* f=fopen("disk","w");
+    fseek(f,id*BLOCK_SIZE,0);
+    char *p1=disk_buf[k];
+    fwrite(p1,BLOCK_SIZE,1,f);
+    fclose(f);
 }
 void read_from(int k,int id){ //把id磁盘块的内容读到第k个缓冲块
     FILE* f=fopen("disk","r");
@@ -70,7 +73,7 @@ void read_from(int k,int id){ //把id磁盘块的内容读到第k个缓冲块
     char *p1=disk_buf[k];
     fread(p1,BLOCK_SIZE,1,f);
     fclose(f);
-    return ;
+
 }
 
 int get_empty(){

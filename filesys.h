@@ -196,7 +196,7 @@ public:
     }
 };
 
-bitset<DINODE_BLK> bitmap;
+extern bitset<DINODE_BLK> bitmap;
 extern struct INode sys_open_file[SYS_OPEN_FILE];   //系统打开文件表
 extern short sys_open_file_count;       //系统打开文件数目
 extern struct User user[USER_NUM];      //用户表
