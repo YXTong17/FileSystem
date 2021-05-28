@@ -12,7 +12,7 @@ using namespace std;
 
 #define BLOCK_SIZE 1024     //每块大小1KB
 #define SYS_OPEN_FILE 40    //系统打开文件表最大项数
-#define DIR_NUM 128         //每个目录所包含的最大目录项数（文件数）
+#define DIR_NUM 42          //每个目录所包含的最大目录项数（文件数）
 #define F_N_SIZE 20         //每个文件名所占字节数
 #define ADDR_N 9            //每个i节点指向的物理地址，前8个直接:8KB，第19一次间址:256KB，第10二次间址:64MB，第11三次间址:16GB
 #define DINODE_SIZE 64      //每个磁盘i节点所占字节
