@@ -111,7 +111,7 @@ public:
     }
 
 };
-
+/*
 int main()
 {
 
@@ -123,3 +123,4 @@ int main()
     disk.allocate_all();
 
 }
+*/
