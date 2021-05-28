@@ -10,6 +10,16 @@
 #define FS_SUPER_BLOCK_H
 
 
+void creat_disk() {
+    FILE *fp = fopen("disk", "wb");;
+    char block[BLOCK_SIZE] = {0};
+    // 创建一个128MB的空间作为磁盘
+    for (int i = 0; i < DISK_BLK; i++)
+        fwrite(block, BLOCK_SIZE, 1, fp);
+    fclose(fp);
+}
+
+
 class DISK_ALLOCATE {
 public:
     int MAX_BLOCK;
@@ -147,4 +157,8 @@ public:
     }
 
 };
+
+
+
+
 #endif //FS_SUPER_BLOCK_H
