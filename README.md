@@ -22,4 +22,4 @@
 | umod  | 文件创建权限码                  |
   
 ![系统or用户打开表结构图.png](https://i0.hdslb.com/bfs/album/4909cd5cb42187ccb2645cb3d2935628a4a2ee6a.png)  
-![磁盘划分](https://i0.hdslb.com/bfs/album/2f20257f9659a95bc4f082b10f9138e5b766fc19.png)  
+![磁盘划分](https://i0.hdslb.com/bfs/album/d5f36bc2e460298b8a8682064b354c0a5f301d1b.png)  
