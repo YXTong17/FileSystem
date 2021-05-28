@@ -158,7 +158,15 @@ public:
 
 };
 
-
-
-
 #endif //FS_SUPER_BLOCK_H
+
+/*
+int main() {
+    creat_disk();
+    DISK_ALLOCATE disk;
+    disk.free_all();
+    disk.allocate_all();
+
+}
+*/
+
