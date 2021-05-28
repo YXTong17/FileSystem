@@ -1,5 +1,17 @@
 函数文件都起名为XXX.cpp  
-然后把相应的函数放到filesys.h中
+然后把相应的函数放到filesys.h中  
+读取磁盘示例：
+
+```cpp
+// 找到当前目录的SFD
+char block[BLOCK_SIZE] = {0};
+disk_read(block, (int) user_mem[cur_user].cur_dir->addr[0]);
+// 读成SFD结构体
+SFD SFD[DIR_NUM];
+memcpy(SFD, block, sizeof(SFD));
+```
+
+
 | 指令  | 功能                            |
 | ----- | ------------------------------- |
 | ls    | 显示文件目录                    |
