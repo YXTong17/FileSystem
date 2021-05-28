@@ -6,6 +6,7 @@
 #include <bitset>
 #include <string>
 #include <vector>
+#include <ctime>
 
 using namespace std;
 
