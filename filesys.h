@@ -29,6 +29,8 @@ using namespace std;
 #define GROUP_USER_NUM 5    //每组用户数
 #define GROUP_NUM 5         //用户组数
 #define DISK_BUF 128        //磁盘缓冲区块数
+#define SECTOR_4_START 4106 //第四区起始块号 *****4106
+#define SECTOR_4_END 131071 //第四区结束快   ******131071
 
 /* 磁盘i节点 64B 每个磁盘块16个节点 */
 struct DINode {
