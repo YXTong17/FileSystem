@@ -1,6 +1,7 @@
 #ifndef FILESYSTEM_FILESYS_H
 #define FILESYSTEM_FILESYS_H
 
+#include <iostream>
 #include <bitset>
 #include <regex>
 #include <string>
@@ -195,7 +196,7 @@ public:
     }
 };
 
-bitset<DINODE_BLK> bitmap;
+extern bitset<DINODE_BLK> bitmap;
 extern struct INode sys_open_file[SYS_OPEN_FILE];   //系统打开文件表
 extern short sys_open_file_count;       //系统打开文件数目
 extern struct User user[USER_NUM];      //用户表
@@ -204,8 +205,15 @@ extern int user_count;                  //用户数
 extern int group_count;                 //用户组数
 extern struct SuperBlock super_block;   //超级块
 extern char disk_buf[DISK_BUF][BLOCK_SIZE]; //磁盘缓冲区
+extern int tag[DISK_BUF];    //每块磁盘缓冲区的tag
 extern DISK_ALLOCATE disk;
 
 void creat_disk();
+
+void init_buf(); //初始化缓冲区
+
+void disk_read(char* buf,int id); //把id磁盘块读到用户自定义的buf
+
+void disk_write(char *buf, int id);//把buf内容写到磁盘的id块
 
 #endif //FILESYSTEM_FILESYS_H

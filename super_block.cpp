@@ -132,7 +132,11 @@ public:
 
 };
 
+
+
+
 int main() {
+
 
     DISK_ALLOCATE disk(R"(C:\Users\Mapc\FS\vector_int.txt)");
     disk.show_super_block();
