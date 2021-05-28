@@ -95,7 +95,7 @@ struct User {
 struct User_Mem {
     struct OFD OFD[OPEN_NUM];   //用户打开文件表
     unsigned short file_count;  //打开文件数
-    INode *cur_dir;             //当前目录
+    struct INode *cur_dir;             //当前目录
 };
 
 /* 用户组 */
@@ -224,7 +224,7 @@ public:
     }
 };
 
-bitset<DINODE_BLK> bitmap;
+extern bitset<DINODE_BLK> bitmap;
 extern struct INode sys_open_file[SYS_OPEN_FILE];   //系统打开文件表
 extern short sys_open_file_count;       //系统打开文件数目
 extern struct User user[USER_NUM];      //用户表
@@ -235,17 +235,26 @@ extern int group_count;                 //用户组数
 //extern struct SuperBlock super_block;   //超级块
 extern char disk_buf[DISK_BUF][BLOCK_SIZE]; //磁盘缓冲区
 extern int tag[DISK_BUF];               //每块磁盘缓冲区的tag
-extern DISK_ALLOCATE disk;
+extern class DISK_ALLOCATE disk;
+
 extern unsigned short cur_user;         //当前用户ID
 extern unsigned short umod;             //默认权限码，默认644，目录644+111=755
 
 void creat_disk();
 
+void init();
+
 unsigned int creat_directory();
 
 void init_buf(); //初始化缓冲区
 
-void dinode_read();
+void dinode_read(struct DINode &DINode, unsigned int di_number);
+
+void dinode_write(const struct DINode &DINode, unsigned int di_number);
+
+unsigned int creat_directory(char file_name[F_N_SIZE]);
+
+void get_inode(struct INode &INode, const struct DINode &DINode, unsigned int di_number);
 
 void disk_read(char *buf, int id); //把id磁盘块读到用户自定义的buf
 
