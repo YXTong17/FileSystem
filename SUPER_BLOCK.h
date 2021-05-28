@@ -26,27 +26,18 @@ public:
     vector<unsigned int> SUPER_BLOCK;
 
     //demo purpose
-    explicit DISK_ALLOCATE(const string& renew) {
+    DISK_ALLOCATE() {
         MAX_BLOCK = FILE_BLK;                           //block count for demo purpose
         BLOCK_MAX_LENGTH = NICFREE;                     //how many block index can a chief block hold
-        /*
-        for (int i = MAX_BLOCK; i > 0; i--) {           //emulate disk block
-            vector<unsigned int> block_place_holder;
-            BLOCK.push_back(block_place_holder);
-        }
-        */
-        for (int i = BLOCK_MAX_LENGTH + 1; i > 0; i--) { //为组长号0号位置预留,加一
-            unsigned int block_num_place_holder = 0;
-            SUPER_BLOCK.push_back(block_num_place_holder);
-        }
-        SUPER_BLOCK[0] = 1;
-        SUPER_BLOCK[1] = 0;
     }
 
-    //restore super_block from file path
-     DISK_ALLOCATE() {
-        MAX_BLOCK = FILE_BLK;
-        BLOCK_MAX_LENGTH = NICFREE;
+    ~DISK_ALLOCATE(){
+        store_super_block();
+        all_write_back();
+    }
+
+    //restore super_block from block#1
+     void restore_super_block() {
 
         int block_num=1;
         vector<unsigned int> block_item;
@@ -63,19 +54,6 @@ public:
         SUPER_BLOCK.assign(block_item.begin(), block_item.end());
     }
 
-    ~DISK_ALLOCATE(){
-        store_super_block();
-        all_write_back();
-    }
-    /*
-    void store_super_block(const string &super_block_store_file_path) {
-        ofstream outfile(super_block_store_file_path);
-        for (auto &iter :SUPER_BLOCK) {
-            outfile << iter << '\n';
-        }
-        outfile.close();
-    }
-    */
 
     void store_super_block(int insert_block_num = 1){
         char insert_block[BLOCK_SIZE]{0};
@@ -141,6 +119,14 @@ public:
     }
 
     void free_all() {
+
+        for (int i = BLOCK_MAX_LENGTH + 1; i > 0; i--) { //为组长号0号位置预留,加一
+            unsigned int block_num_place_holder = 0;
+            SUPER_BLOCK.push_back(block_num_place_holder);
+        }
+        SUPER_BLOCK[0] = 1;
+        SUPER_BLOCK[1] = 0;
+
         for (int i = MAX_BLOCK + SECTOR_4_START; i > SECTOR_4_START; i--) {
             free_block(i);
             if(i%10000 == 0){
@@ -174,16 +160,14 @@ public:
 
 /*
  int main(){
-    DISK_ALLOCATE disk("1");
-    disk.free_all();
-    for(int i=10; i>0; i--){
-        disk.allocate_block();
+    DISK_ALLOCATE disk;
+    disk.restore_super_block();
+    //disk.free_all();
+    for (int i = 200; i > 0; i--) {
+        int block = disk.allocate_block();
+        cout <<"["<< block <<"]"<< "<-";
+        disk.show_super_block();
     }
-    disk.store_super_block();
-    all_write_back();
-
-    DISK_ALLOCATE disk2;
-    disk2.show_super_block();
  }
-    
+
 */
