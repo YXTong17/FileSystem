@@ -9,7 +9,6 @@
 #ifndef FS_SUPER_BLOCK_H
 #define FS_SUPER_BLOCK_H
 
-
 void creat_disk() {
     FILE *fp = fopen("disk", "wb");;
     char block[BLOCK_SIZE] = {0};
@@ -19,7 +18,6 @@ void creat_disk() {
     fclose(fp);
 }
 
-
 class DISK_ALLOCATE {
 public:
     int MAX_BLOCK;
@@ -28,7 +26,7 @@ public:
     vector<unsigned int> SUPER_BLOCK;
 
     //demo purpose
-    DISK_ALLOCATE() {
+    explicit DISK_ALLOCATE(const string& renew) {
         MAX_BLOCK = FILE_BLK;                           //block count for demo purpose
         BLOCK_MAX_LENGTH = NICFREE;                     //how many block index can a chief block hold
         /*
@@ -46,21 +44,30 @@ public:
     }
 
     //restore super_block from file path
-    explicit DISK_ALLOCATE(const string &super_block_restore_file_path) {
+     DISK_ALLOCATE() {
         MAX_BLOCK = FILE_BLK;
         BLOCK_MAX_LENGTH = NICFREE;
 
-        ifstream infile(super_block_restore_file_path);
-        unsigned int int_in;
-        while (!infile.eof()) {
-            infile >> int_in;
-            SUPER_BLOCK.push_back(int_in);
+        int block_num=1;
+        vector<unsigned int> block_item;
+        char block_content[BLOCK_SIZE]{0};
+        string str_temp;
+        disk_read(block_content, block_num);
+        str_temp = block_content;
+        regex re("\\d+");
+        sregex_iterator end;
+        for(sregex_iterator iter(str_temp.begin(), str_temp.end(), re); iter!=end; iter++){
+            //cout<<iter->str()<<endl;
+            block_item.push_back(stoi(iter->str()));
         }
-        infile.close();
-        SUPER_BLOCK.pop_back();
+        SUPER_BLOCK.assign(block_item.begin(), block_item.end());
     }
 
-    /*~DISK_ALLOCATE()*/
+    ~DISK_ALLOCATE(){
+        store_super_block();
+        all_write_back();
+    }
+    /*
     void store_super_block(const string &super_block_store_file_path) {
         ofstream outfile(super_block_store_file_path);
         for (auto &iter :SUPER_BLOCK) {
@@ -68,18 +75,24 @@ public:
         }
         outfile.close();
     }
+    */
+
+    void store_super_block(int insert_block_num = 1){
+        char insert_block[BLOCK_SIZE]{0};
+        string str_temp;
+        for(auto& iter: SUPER_BLOCK) {
+            str_temp += to_string(iter);
+            str_temp += ' ';
+        }
+        str_temp.copy(insert_block, str_temp.length(), 0);
+        disk_write(insert_block, insert_block_num);
+    }
+
 
     void free_block(int block_num) {
         int insert_place = block_num;
         if (SUPER_BLOCK[0] == BLOCK_MAX_LENGTH) {
-            char insert_block[BLOCK_SIZE]{0};
-            string str_temp;
-            for(auto& iter: SUPER_BLOCK) {
-                str_temp += to_string(iter);
-                str_temp += ' ';
-            }
-            str_temp.copy(insert_block, str_temp.length(), 0); //vector<unsigned int> insert_block(SUPER_BLOCK);
-            disk_write(insert_block, insert_place);        //block read_disk(block_num);
+            store_super_block(insert_place);
             for (int i = 0; i < BLOCK_MAX_LENGTH + 1; i++) {
                 SUPER_BLOCK[i] = 0;
             }
@@ -100,7 +113,7 @@ public:
                 unsigned int block_num = SUPER_BLOCK[1];
                 //vector<unsigned int> block_item(BLOCK[block_num]);//block read_disk(block_num);
                 vector<unsigned int> block_item;
-                char block_content[1024]{0};
+                char block_content[BLOCK_SIZE]{0};
                 string str_temp;
                 disk_read(block_content, block_num);
                 str_temp = block_content;
@@ -110,7 +123,7 @@ public:
                     //cout<<iter->str()<<endl;
                     block_item.push_back(stoi(iter->str()));
                 }
-                SUPER_BLOCK = block_item;
+                SUPER_BLOCK.assign(block_item.begin(), block_item.end());
                 return block_num;
             }
         } else {
@@ -143,7 +156,7 @@ public:
     }
 
     void allocate_all() {
-        for (int i = MAX_BLOCK; i > 0; i--) {
+        for (int i = 0; i <MAX_BLOCK; i++) {
             if(i%10000 == 0){
                 double i_d = i;
                 double M_d = MAX_BLOCK;
@@ -157,16 +170,20 @@ public:
     }
 
 };
-
 #endif //FS_SUPER_BLOCK_H
 
 /*
-int main() {
-    creat_disk();
-    DISK_ALLOCATE disk;
+ int main(){
+    DISK_ALLOCATE disk("1");
     disk.free_all();
-    disk.allocate_all();
+    for(int i=10; i>0; i--){
+        disk.allocate_block();
+    }
+    disk.store_super_block();
+    all_write_back();
 
-}
+    DISK_ALLOCATE disk2;
+    disk2.show_super_block();
+ }
+    
 */
-
