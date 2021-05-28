@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <bitset>
-#include <string>
+#include <cstring>
 #include <vector>
 #include <ctime>
 
@@ -14,7 +14,7 @@ using namespace std;
 #define SYS_OPEN_FILE 40    //系统打开文件表最大项数
 #define DIR_NUM 42          //每个目录所包含的最大目录项数（文件数）
 #define F_N_SIZE 20         //每个文件名所占字节数
-#define ADDR_N 9            //每个i节点指向的物理地址，前8个直接:8KB，第19一次间址:256KB，第10二次间址:64MB，第11三次间址:16GB
+#define ADDR_N 10            //每个i节点指向的物理地址，前7个直接:7KB，第8一次间址:256KB，第9二次间址:64MB，第10三次间址:16GB
 #define DINODE_SIZE 64      //每个磁盘i节点所占字节
 #define DINODE_COUNT 65536  //磁盘i节点数量
 #define DINODE_BLK 4096     //所有磁盘i节点共占4096个物理块，前8块是bitmap块
@@ -44,7 +44,7 @@ struct DINode {
     r-x = 101 = 5
     rw- = 110 = 6
     rwx = 111 = 7   */
-    unsigned int addr[ADDR_N];  //文件物理地址，前6个直接:6KB，第7一次间址:256KB，第8二次间址:64MB，第9三次间址:16GB
+    unsigned int addr[ADDR_N];  //文件物理地址，前7个直接:7KB，第8一次间址:256KB，第9二次间址:64MB，第10三次间址:16GB
     unsigned int block_num;     //文件所使用的磁盘块的实际数目
     unsigned int file_size;     //文件大小
     unsigned short link_count;  //文件链接计数
@@ -244,6 +244,8 @@ void creat_disk();
 unsigned int creat_directory();
 
 void init_buf(); //初始化缓冲区
+
+void dinode_read();
 
 void disk_read(char *buf, int id); //把id磁盘块读到用户自定义的buf
 
