@@ -35,3 +35,4 @@ memcpy(SFD, block, sizeof(SFD));
   
 ![系统or用户打开表结构图.png](https://i0.hdslb.com/bfs/album/4909cd5cb42187ccb2645cb3d2935628a4a2ee6a.png)  
 ![磁盘划分](https://i0.hdslb.com/bfs/album/d5f36bc2e460298b8a8682064b354c0a5f301d1b.png)  
+![大致的物理结构](https://636c-cloud-9gvs1hikbbe90306-1305052785.tcb.qcloud.la/Hong.png?sign=d3ba01d6cbf1582738ca6779de3d0e83&t=1622181864)  
