@@ -120,110 +120,6 @@ struct Group {
 //    char s_fmod;                //超级块修改标志
 //};
 
-class DISK_ALLOCATE {
-public:
-    int MAX_BLOCK;
-    int BLOCK_MAX_LENGTH;
-    vector<vector<int>> BLOCK;
-    vector<int> SUPER_BLOCK;
-
-    //demo purpose
-    DISK_ALLOCATE() {
-        MAX_BLOCK = FILE_BLK;                           //block count for demo purpose
-        BLOCK_MAX_LENGTH = NICFREE;                     //how many block index can a chief block hold
-        for (int i = MAX_BLOCK; i > 0; i--) {           //emulate disk block
-            vector<int> block_place_holder;
-            BLOCK.push_back(block_place_holder);
-        }
-        for (int i = BLOCK_MAX_LENGTH + 1; i > 0; i--) { //为组长号0号位置预留,加一
-            int block_num_place_holder = 0;
-            SUPER_BLOCK.push_back(block_num_place_holder);
-        }
-        SUPER_BLOCK[0] = 1;
-        SUPER_BLOCK[1] = 0;
-    }
-
-    //restore super_block from file path
-    explicit DISK_ALLOCATE(const string &super_block_restore_file_path) {
-        MAX_BLOCK = FILE_BLK;
-        BLOCK_MAX_LENGTH = NICFREE;
-
-        ifstream infile(super_block_restore_file_path);
-        int int_in;
-        while (!infile.eof()) {
-            infile >> int_in;
-            SUPER_BLOCK.push_back(int_in);
-        }
-        infile.close();
-        SUPER_BLOCK.pop_back();
-    }
-
-    /*~DISK_ALLOCATE()*/
-    void store_super_block(const string &super_block_store_file_path) {
-        ofstream outfile(super_block_store_file_path);
-        for (auto &iter :SUPER_BLOCK) {
-            outfile << iter << '\n';
-        }
-        outfile.close();
-    }
-
-    void free_block(int block_num) {
-        if (SUPER_BLOCK[0] == BLOCK_MAX_LENGTH) {
-            vector<int> insert_block(SUPER_BLOCK);
-            BLOCK[block_num] = insert_block;        //block read_disk(block_num);
-            for (int i = 0; i < BLOCK_MAX_LENGTH + 1; i++) {
-                SUPER_BLOCK[i] = 0;
-            }
-            SUPER_BLOCK[1] = block_num;
-            SUPER_BLOCK[0]++;
-        } else {
-            SUPER_BLOCK[0]++;
-            SUPER_BLOCK[SUPER_BLOCK[0]] = block_num;
-        }
-    }
-
-    unsigned int allocate_block() {
-        if (SUPER_BLOCK[0] == 1) {
-            if (SUPER_BLOCK[1] == 0) {
-                cout << "****no more space to be allocated****";
-                return -1;
-            } else {
-                int block_num = SUPER_BLOCK[1];
-                vector<int> block_item(BLOCK[block_num]);//block read_disk(block_num);
-                SUPER_BLOCK = block_item;
-                return block_num;
-            }
-        } else {
-            int block_num = SUPER_BLOCK[SUPER_BLOCK[0]];
-            SUPER_BLOCK[0]--;
-            return block_num;
-        }
-    }
-
-    void show_super_block() {
-        for (auto &iter : SUPER_BLOCK) {
-            cout << iter << "|";
-        }
-        cout << endl;
-    }
-
-    void free_all() {
-        for (int i = MAX_BLOCK; i > 0; i--) {
-            free_block(i);
-            cout << SUPER_BLOCK[SUPER_BLOCK[0]] << "->";
-            show_super_block();
-        }
-    }
-
-    void allocate_all() {
-        for (int i = MAX_BLOCK; i > 0; i--) {
-            int block = allocate_block();
-            cout << block << "<-";
-            show_super_block();
-        }
-    }
-};
-
 extern bitset<DINODE_BLK> bitmap;
 extern struct INode sys_open_file[SYS_OPEN_FILE];   //系统打开文件表
 extern short sys_open_file_count;       //系统打开文件数目
@@ -235,7 +131,6 @@ extern int group_count;                 //用户组数
 //extern struct SuperBlock super_block;   //超级块
 extern char disk_buf[DISK_BUF][BLOCK_SIZE]; //磁盘缓冲区
 extern int tag[DISK_BUF];               //每块磁盘缓冲区的tag
-extern class DISK_ALLOCATE disk;
 
 extern unsigned short cur_user;         //当前用户ID
 extern unsigned short umod;             //默认权限码，默认644，目录644+111=755
