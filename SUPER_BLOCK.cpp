@@ -15,7 +15,7 @@ DISK_ALLOCATE::DISK_ALLOCATE() {
         BLOCK.push_back(block_place_holder);
     }
     */
-    for (int i = BLOCK_MAX_LENGTH + 1; i > 0; i--) { //Ϊ�鳤��0��λ��Ԥ��,��һ
+    for (int i = BLOCK_MAX_LENGTH + 1; i > 0; i--) { //为组长号0号位置预留,加一
         unsigned int block_num_place_holder = 0;
         SUPER_BLOCK.push_back(block_num_place_holder);
     }
@@ -108,34 +108,14 @@ void DISK_ALLOCATE::show_super_block() {
 }
 
 void DISK_ALLOCATE::free_all() {
-    FILE *f = fopen("disk", "r+b");
-    for (int i = BLOCK_MAX_LENGTH + 1; i > 0; i--) { //Ϊ�鳤��0��λ��Ԥ��,��һ
+    for (int i = BLOCK_MAX_LENGTH + 1; i > 0; i--) { //为组长号0号位置预留,加一
         unsigned int block_num_place_holder = 0;
         SUPER_BLOCK.push_back(block_num_place_holder);
     }
     SUPER_BLOCK[0] = 1;
     SUPER_BLOCK[1] = 0;
     for (int i = MAX_BLOCK + SECTOR_4_START; i > SECTOR_4_START; i--) {
-        int insert_place = i;
-        if (SUPER_BLOCK[0] == BLOCK_MAX_LENGTH) {
-            char insert_block[BLOCK_SIZE]{0};
-            string str_temp;
-            for (auto &iter: SUPER_BLOCK) {
-                str_temp += to_string(iter);
-                str_temp += ' ';
-            }
-            str_temp.copy(insert_block, str_temp.length(), 0);
-            fseek(f, (long) insert_place * BLOCK_SIZE, 0);
-            fwrite(insert_block, BLOCK_SIZE, 1, f);
-            for (int j = 0; j < BLOCK_MAX_LENGTH + 1; j++) {
-                SUPER_BLOCK[j] = 0;
-            }
-            SUPER_BLOCK[1] = i;
-            SUPER_BLOCK[0]++;
-        } else {
-            SUPER_BLOCK[0]++;
-            SUPER_BLOCK[SUPER_BLOCK[0]] = i;
-        }
+        free_block(i);
         if (i % 10000 == 0) {
             double i_d = i;
             cout << i_d / MAX_BLOCK << endl;
@@ -144,7 +124,6 @@ void DISK_ALLOCATE::free_all() {
         //show_super_block();
     }
     cout << "free_all()" << endl;
-    fclose(f);
 }
 
 void DISK_ALLOCATE::allocate_all() {
@@ -158,6 +137,18 @@ void DISK_ALLOCATE::allocate_all() {
         //show_super_block();
     }
     cout << "allocate_all()" << endl;
+}
+
+// 成组链接专用读磁盘函数
+void disk_read_d(char *buf, unsigned int id) {
+    fseek(fp, (long) id * BLOCK_SIZE, 0);
+    fread(buf, BLOCK_SIZE, 1, fp);
+}
+
+// 成组链接专用写磁盘函数
+void disk_write_d(char *buf, unsigned int id) {
+    fseek(fp, (long) id * BLOCK_SIZE, 0);
+    fwrite(buf, BLOCK_SIZE, 1, fp);
 }
 
 #endif //FS_SUPER_BLOCK_H
