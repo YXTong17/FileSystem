@@ -2,46 +2,47 @@
 #include <iostream>
 #include <cstring>
 
-// ´´½¨´ÅÅÌ²¢³õÊ¼»¯»ù±¾Ä¿Â¼
+// åˆ›å»ºç£ç›˜å¹¶åˆå§‹åŒ–åŸºæœ¬ç›®å½•
 void creat_disk() {
-    FILE *fp = fopen("disk", "wb");
+    fp = fopen("disk", "wb");
     char block[BLOCK_SIZE] = {0};
-    // ´´½¨Ò»¸ö128MBµÄ¿Õ¼ä×÷Îª´ÅÅÌ
+    // åˆ›å»ºä¸€ä¸ª128MBçš„ç©ºé—´ä½œä¸ºç£ç›˜
     for (int i = 0; i < DISK_BLK; i++)
         fwrite(block, BLOCK_SIZE, 1, fp);
     fclose(fp);
-    // ³õÊ¼»¯³¬¼¶¿é
+    fp = fopen("disk", "rb+");
+    // åˆå§‹åŒ–è¶…çº§å—
     disk.free_all();
-    // ĞÂ½¨ÓÃ»§admin
+    // æ–°å»ºç”¨æˆ·admin
     strcpy(user[0].user_name, "admin");
     strcpy(user[0].password, "admin");
     user[0].user_id = 0;
     user_count++;
-    // ÓÃadminÉí·İ ´´½¨Ò»Ğ©±ØÒªµÄÎÄ¼ş,ÕâĞ©ÎÄ¼şÓĞ/ /bin /dev /etc /lib /tmp /user
-    // ´´½¨¸ùÄ¿Â¼
-    struct DINode root = {  // ¸ùÄ¿Â¼µÄ´ÅÅÌi½Úµã
+    // ç”¨adminèº«ä»½ åˆ›å»ºä¸€äº›å¿…è¦çš„æ–‡ä»¶,è¿™äº›æ–‡ä»¶æœ‰/ /bin /dev /etc /lib /tmp /user
+    // åˆ›å»ºæ ¹ç›®å½•
+    struct DINode root = {  // æ ¹ç›®å½•çš„ç£ç›˜ièŠ‚ç‚¹
             .owner = 0,     // admin
-            .group = 0,     // ÎŞ
-            .file_type = 1, // Ä¿Â¼ÎÄ¼ş
-            .mode = 777,    // Ä¬ÈÏÈ«²¿È¨ÏŞ
-            .addr = {disk.allocate_block()},    // Êı¾İÇøµÚÒ»¿é
+            .group = 0,     // æ— 
+            .file_type = 1, // ç›®å½•æ–‡ä»¶
+            .mode = 777,    // é»˜è®¤å…¨éƒ¨æƒé™
+            .addr = {disk.allocate_block()},    // æ•°æ®åŒºç¬¬ä¸€å—
             .block_num = 1,
             .file_size = 144,
             .link_count = 0,
             .last_time = time((time_t *) nullptr)
     };
-    // ¸ùÄ¿Â¼·Åµ½ÏµÍ³´ò¿ªÎÄ¼ş±íÖĞ
+    // æ ¹ç›®å½•æ”¾åˆ°ç³»ç»Ÿæ‰“å¼€æ–‡ä»¶è¡¨ä¸­
     struct INode root_i{};
     get_inode(root_i, root, 0);
     memcpy(&sys_open_file[0], &root_i, sizeof(root_i));
     sys_open_file_count++;
-    // i½ÚµãĞ´Èë´ÅÅÌ
+    // ièŠ‚ç‚¹å†™å…¥ç£ç›˜
     bitmap[0] = true;
     dinode_write(root, 0);
-    // µ±Ç°Ä¿Â¼Ö¸Ïò¸ùÄ¿Â¼
+    // å½“å‰ç›®å½•æŒ‡å‘æ ¹ç›®å½•
     user_mem[cur_user].cur_dir = &sys_open_file[0];
     strcpy(user_mem[cur_user].cwd, "/");
-    // ½¨Á¢×ÓÄ¿Â¼
+    // å»ºç«‹å­ç›®å½•
     creat_directory((char *) "bin");
     creat_directory((char *) "dev");
     creat_directory((char *) "etc");
@@ -50,79 +51,79 @@ void creat_disk() {
     creat_directory((char *) "user");
 }
 
-// ÔÚÒıµ¼¿éÖĞ±£´æÊı¾İ
+// åœ¨å¼•å¯¼å—ä¸­ä¿å­˜æ•°æ®
 void store() {
     char block[BLOCK_SIZE] = {0}, *p = block;
-    // ÓÃ»§±í
+    // ç”¨æˆ·è¡¨
     memcpy(p, user, sizeof(user));
     p += sizeof(user);
     memcpy(p, &user_count, sizeof(user_count));
     p += sizeof(user_count);
-    // ÓÃ»§×é
+    // ç”¨æˆ·ç»„
     memcpy(p, group, sizeof(group));
     p += sizeof(group);
     memcpy(p, &group_count, sizeof(group_count));
     p += sizeof(group_count);
-    // Ä¬ÈÏÈ¨ÏŞÂë
+    // é»˜è®¤æƒé™ç 
     memcpy(p, &umod, sizeof(umod));
-    // ³¬¼¶¿é
+    // è¶…çº§å—
     disk.store_super_block();
-    disk_write_d(block, 0);
+    disk_write(block, 0);
     // bitmap
     char bitmap_c[DINODE_BLK] = {0};
     p = bitmap_c;
     memcpy(bitmap_c, &bitmap, sizeof(bitmap));
     for (int i = 2; i < 10; i++) {
-        disk_write_d(p, i);
+        disk_write(p, i);
         p += sizeof(bitmap);
     }
 }
 
-// ´ÓÒıµ¼¿éÖĞ»Ö¸´Êı¾İ
+// ä»å¼•å¯¼å—ä¸­æ¢å¤æ•°æ®
 void restore() {
     char block[BLOCK_SIZE] = {0}, *p = block;
-    disk_read_d(block, 0);
-    // ÓÃ»§±í
+    disk_read(block, 0);
+    // ç”¨æˆ·è¡¨
     memcpy(user, p, sizeof(user));
     p += sizeof(user);
     memcpy(&user_count, p, sizeof(user_count));
     p += sizeof(user_count);
-    // ÓÃ»§×é
+    // ç”¨æˆ·ç»„
     memcpy(group, p, sizeof(group));
     p += sizeof(group);
     memcpy(&group_count, p, sizeof(group_count));
     p += sizeof(group_count);
-    // Ä¬ÈÏÈ¨ÏŞÂë
+    // é»˜è®¤æƒé™ç 
     memcpy(&umod, p, sizeof(umod));
-    // ³¬¼¶¿é
+    // è¶…çº§å—
     disk.restore_super_block();
     // bitmap
     char bitmap_c[DINODE_BLK] = {0};
     p = bitmap_c;
     for (int i = 2; i < 10; i++) {
-        disk_read_d(p, i);
+        disk_read(p, i);
         p += sizeof(bitmap);
     }
     memcpy(&bitmap, bitmap_c, sizeof(bitmap));
 }
 
-// ÏµÍ³³õÊ¼»¯
+// ç³»ç»Ÿåˆå§‹åŒ–
 void init() {
-    bitmap.reset(); // ³õÊ¼»¯bitmap
+    bitmap.reset(); // åˆå§‹åŒ–bitmap
     init_buf();
     sys_open_file_count = 0;
     user_count = 0;
     group_count = 0;
     cur_user = 0;   // admin
     umod = 644;
-    FILE *fp = fopen("disk", "r+b");
-    if (!fp) {  // Èç¹ûÃ»ÕÒµ½disk
-        cout << "¼ì²â²»µ½´ÅÅÌ£¬ÖØ½¨ÖĞ...\n";
+    fp = fopen("disk", "rb+");
+    if (!fp) {  // å¦‚æœæ²¡æ‰¾åˆ°disk
+        cout << "æ£€æµ‹ä¸åˆ°ç£ç›˜ï¼Œé‡å»ºä¸­...\n";
         creat_disk();
     } else {
-        /* ¶ÁÈ¡´ÅÅÌÖĞµÄÊı¾İ */
+        /* è¯»å–ç£ç›˜ä¸­çš„æ•°æ® */
         restore();
-        // ¶ÁÈ¡¸ùÄ¿Â¼
+        // è¯»å–æ ¹ç›®å½•
         struct DINode root{};
         dinode_read(root, 0);
         get_inode(sys_open_file[0], root, 0);
@@ -130,5 +131,4 @@ void init() {
         user_mem[0].cur_dir = &sys_open_file[0];
         strcpy(user_mem->cwd, "/");
     }
-    fclose(fp);
 }
