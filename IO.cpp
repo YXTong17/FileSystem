@@ -18,33 +18,35 @@ void init_buf() {
     }
 }
 
-void disk_read(char *buf, int id) { //°Ñid´ÅÅÌ¿é¶Áµ½ÓÃ»§×Ô¶¨ÒåµÄbuf
+void disk_read(char *buf, int id) { //æŠŠidç£ç›˜å—è¯»åˆ°ç”¨æˆ·è‡ªå®šä¹‰çš„buf
     for (int i = 0; i < DISK_BUF; i++) {
         if (tag[i] == id) {
             read(buf, i);
             return;
         }
     }
-    //ÔËĞĞµ½ÕâÀï±íÊ¾È«²¿»º³åÇø¶¼Ã»ÕÒµ½¶ÔÓ¦idµÄbuf¿é
-    int k = get_empty();//»ñµÃ1¿é¿ÕÏĞ¿é
-    read_from(k, id); //°Ñ´ÅÅÌµÄµÚid¿éĞ´Èëµ½»º³åÇøµÄµÚk¿é
+    //è¿è¡Œåˆ°è¿™é‡Œè¡¨ç¤ºå…¨éƒ¨ç¼“å†²åŒºéƒ½æ²¡æ‰¾åˆ°å¯¹åº”idçš„bufå—
+    int k = get_empty();//è·å¾—1å—ç©ºé—²å—
+    read_from(k, id); //æŠŠç£ç›˜çš„ç¬¬idå—å†™å…¥åˆ°ç¼“å†²åŒºçš„ç¬¬kå—
     tag[k] = id;
     read(buf, k);
 }
 
 void disk_write(char *buf, int id) {
     for (int i = 0; i < DISK_BUF; i++) {
-        if (tag[i] == id) { //Èô¶ÔÓ¦´ÅÅÌ¿éÔÚ»º³åÇøÄÚ¾ÍÖ±½ÓĞ´µ½»º³åÇø
-            write(buf, i); //°ÑbufµÄÄÚÈİĞ´µ½µÚi»º³å¿éÖĞ
+        if (tag[i] == id) { //è‹¥å¯¹åº”ç£ç›˜å—åœ¨ç¼“å†²åŒºå†…å°±ç›´æ¥å†™åˆ°ç¼“å†²åŒº
+            write(buf, i); //æŠŠbufçš„å†…å®¹å†™åˆ°ç¬¬iç¼“å†²å—ä¸­
+            return;
         }
     }
-    //ÔËĞĞµ½ÕâÀï±íÊ¾Ã»ÓĞ»º³å¿é¶ÔÓ¦idÎïÀí¿é£¬ÄÇÃ´¾ÍÖÃ»»1¿é»º³å¿é
+    //è¿è¡Œåˆ°è¿™é‡Œè¡¨ç¤ºæ²¡æœ‰ç¼“å†²å—å¯¹åº”idç‰©ç†å—ï¼Œé‚£ä¹ˆå°±ç½®æ¢1å—ç¼“å†²å—
     int k = get_empty();
+    write_back(k);
     tag[k] = id;
     write(buf, k);
 }
 
-void read(char *buf, int k) { //°Ñk»º³å¿éµÄÄÚÈİ¶Áµ½bufÖĞ
+void read(char *buf, int k) { //æŠŠkç¼“å†²å—çš„å†…å®¹è¯»åˆ°bufä¸­
     char *p = disk_buf[k];
     memcpy(buf, p, BLOCK_SIZE);
 //    for (int i = 0; i < BLOCK_SIZE; i++) {
@@ -52,7 +54,7 @@ void read(char *buf, int k) { //°Ñk»º³å¿éµÄÄÚÈİ¶Áµ½bufÖĞ
 //    }
 }
 
-void write(const char *buf, int k) { //°ÑbufÄÚÈİĞ´µ½k»º³å¿éÖĞ
+void write(const char *buf, int k) { //æŠŠbufå†…å®¹å†™åˆ°kç¼“å†²å—ä¸­
     char *p = disk_buf[k];
     memcpy(p, buf, BLOCK_SIZE);
 //    for (int i = 0; i < BLOCK_SIZE; i++) {
@@ -60,33 +62,29 @@ void write(const char *buf, int k) { //°ÑbufÄÚÈİĞ´µ½k»º³å¿éÖĞ
 //    }
 }
 
-void write_back(int k) { //°ÑµÚk»º³å¿éĞ´»Ø´ÅÅÌµÄtag[k]¿é,Èô´íÎóÔò·µ»Ø-1£¬·ñÔò·µ»Ø1
+void write_back(int k) { //æŠŠç¬¬kç¼“å†²å—å†™å›ç£ç›˜çš„tag[k]å—,è‹¥é”™è¯¯åˆ™è¿”å›-1ï¼Œå¦åˆ™è¿”å›1
     int id = tag[k];
     if (id < 0)
         return;
-    FILE *f = fopen("disk", "r+");
-    fseek(f, id * BLOCK_SIZE, 0);
+    fseek(fp, id * BLOCK_SIZE, 0);
     char *p1 = disk_buf[k];
-    fwrite(p1, BLOCK_SIZE, 1, f);
-    fclose(f);
+    fwrite(p1, BLOCK_SIZE, 1, fp);
 }
 
-void read_from(int k, int id) { //°Ñid´ÅÅÌ¿éµÄÄÚÈİ¶Áµ½µÚk¸ö»º³å¿é
-    FILE *f = fopen("disk", "r");
-    fseek(f, id * BLOCK_SIZE, 0);
+void read_from(int k, int id) { //æŠŠidç£ç›˜å—çš„å†…å®¹è¯»åˆ°ç¬¬kä¸ªç¼“å†²å—
+    fseek(fp, id * BLOCK_SIZE, 0);
     char *p1 = disk_buf[k];
-    fread(p1, BLOCK_SIZE, 1, f);
-    fclose(f);
+    fread(p1, BLOCK_SIZE, 1, fp);
 }
 
 void all_write_back() {
     for (int i = 0; i < DISK_BUF; i++) {
-//        write_back(i);
+        write_back(i);
     }
 }
 
 int get_empty() {
-    //Ä¿Ç°ÔİÊ±È«²¿°ÑµÚ0¿é×÷ÎªÖÃ»»¿é
-    write_back(0); //°ÑµÚ0¿éĞ´»Ø´ÅÅÌµÄtag[0]¿é
+    //ç›®å‰æš‚æ—¶å…¨éƒ¨æŠŠç¬¬0å—ä½œä¸ºç½®æ¢å—
+    write_back(0); //æŠŠç¬¬0å—å†™å›ç£ç›˜çš„tag[0]å—
     return 0;
 }
