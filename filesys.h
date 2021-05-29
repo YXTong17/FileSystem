@@ -7,23 +7,23 @@
 
 using namespace std;
 
-#define BLOCK_SIZE 1024     //Ã¿¿é´óĞ¡1KB
-#define SYS_OPEN_FILE 40    //ÏµÍ³´ò¿ªÎÄ¼ş±í×î´óÏîÊı
-#define DIR_NUM 42          //Ã¿¸öÄ¿Â¼Ëù°üº¬µÄ×î´óÄ¿Â¼ÏîÊı£¨ÎÄ¼şÊı£©
-#define F_N_SIZE 20         //Ã¿¸öÎÄ¼şÃûËùÕ¼×Ö½ÚÊı
-#define ADDR_N 10            //Ã¿¸öi½ÚµãÖ¸ÏòµÄÎïÀíµØÖ·£¬Ç°7¸öÖ±½Ó:7KB£¬µÚ8Ò»´Î¼äÖ·:256KB£¬µÚ9¶ş´Î¼äÖ·:64MB£¬µÚ10Èı´Î¼äÖ·:16GB
-#define DINODE_SIZE 64      //Ã¿¸ö´ÅÅÌi½ÚµãËùÕ¼×Ö½Ú
-#define DINODE_COUNT 65536  //´ÅÅÌi½ÚµãÊıÁ¿
-#define DINODE_BLK 4096     //ËùÓĞ´ÅÅÌi½Úµã¹²Õ¼4096¸öÎïÀí¿é£¬Ç°8¿éÊÇbitmap¿é
-#define DISK_BLK 131072     //¹²ÓĞ128K¸öÎïÀí¿é,Õ¼ÓÃ128MB
-#define FILE_BLK 126966     //Ä¿Â¼¼°Êı¾İÇø¿éÊı 131072-(2+8+4096)
-#define NICFREE 50          //³¬¼¶¿éÖĞ¿ÕÏĞ¿éÊı×éµÄ×î´ó¿éÊı
-#define USER_NUM 10         //ÓÃ»§Êı
-#define OPEN_NUM 20         //ÓÃ»§´ò¿ªÎÄ¼şÊı
-#define GROUP_USER_NUM 5    //Ã¿×éÓÃ»§Êı
-#define GROUP_NUM 5         //ÓÃ»§×éÊı
-#define DISK_BUF 128        //´ÅÅÌ»º³åÇø¿éÊı
-#define SECTOR_4_START 4106 //µÚËÄÇøÆğÊ¼¿éºÅ *****4106
+#define BLOCK_SIZE 1024     //æ¯å—å¤§å°1KB
+#define SYS_OPEN_FILE 40    //ç³»ç»Ÿæ‰“å¼€æ–‡ä»¶è¡¨æœ€å¤§é¡¹æ•°
+#define DIR_NUM 42          //æ¯ä¸ªç›®å½•æ‰€åŒ…å«çš„æœ€å¤§ç›®å½•é¡¹æ•°ï¼ˆæ–‡ä»¶æ•°ï¼‰
+#define F_N_SIZE 20         //æ¯ä¸ªæ–‡ä»¶åæ‰€å å­—èŠ‚æ•°
+#define ADDR_N 10           //æ¯ä¸ªièŠ‚ç‚¹æŒ‡å‘çš„ç‰©ç†åœ°å€ï¼Œå‰7ä¸ªç›´æ¥:7KBï¼Œç¬¬8ä¸€æ¬¡é—´å€:256KBï¼Œç¬¬9äºŒæ¬¡é—´å€:64MBï¼Œç¬¬10ä¸‰æ¬¡é—´å€:16GB
+#define DINODE_SIZE 64      //æ¯ä¸ªç£ç›˜ièŠ‚ç‚¹æ‰€å å­—èŠ‚
+#define DINODE_COUNT 65536  //ç£ç›˜ièŠ‚ç‚¹æ•°é‡
+#define DINODE_BLK 4096     //æ‰€æœ‰ç£ç›˜ièŠ‚ç‚¹å…±å 4096ä¸ªç‰©ç†å—ï¼Œå‰8å—æ˜¯bitmapå—
+#define DISK_BLK 131072     //å…±æœ‰128Kä¸ªç‰©ç†å—,å ç”¨128MB
+#define FILE_BLK 126966     //ç›®å½•åŠæ•°æ®åŒºå—æ•° 131072-(2+8+4096)
+#define NICFREE 50          //è¶…çº§å—ä¸­ç©ºé—²å—æ•°ç»„çš„æœ€å¤§å—æ•°
+#define USER_NUM 10         //ç”¨æˆ·æ•°
+#define OPEN_NUM 20         //ç”¨æˆ·æ‰“å¼€æ–‡ä»¶æ•°
+#define GROUP_USER_NUM 5    //æ¯ç»„ç”¨æˆ·æ•°
+#define GROUP_NUM 5         //ç”¨æˆ·ç»„æ•°
+#define DISK_BUF 128        //ç£ç›˜ç¼“å†²åŒºå—æ•°
+#define SECTOR_4_START 4106 //ç¬¬å››åŒºèµ·å§‹å—å· *****4106
 
 /*  --- = 000 = 0
     --x = 001 = 1
@@ -33,71 +33,71 @@ using namespace std;
     r-x = 101 = 5
     rw- = 110 = 6
     rwx = 111 = 7   */
-/* ´ÅÅÌi½Úµã 64B Ã¿¸ö´ÅÅÌ¿é16¸ö½Úµã */
+/* ç£ç›˜ièŠ‚ç‚¹ 64B æ¯ä¸ªç£ç›˜å—16ä¸ªèŠ‚ç‚¹ */
 struct DINode {
-    unsigned short owner;       //¸ÃÎÄ¼şËùÓĞÕßµÄID
-    unsigned short group;       //¸ÃÎÄ¼şÓÃ»§×éµÄID
-    unsigned short file_type;   //0:Õı¹æÎÄ¼ş 1:Ä¿Â¼ÎÄ¼ş 2:ÌØ±ğÎÄ¼ş
-    unsigned short mode;        //rwx r-x r-x ËùÓĞÕßÈ¨ÏŞ+×éÈ¨ÏŞ+ÆäËûÈËÈ¨ÏŞ
-    unsigned int addr[ADDR_N];  //ÎÄ¼şÎïÀíµØÖ·£¬Ç°7¸öÖ±½Ó:7KB£¬µÚ8Ò»´Î¼äÖ·:256KB£¬µÚ9¶ş´Î¼äÖ·:64MB£¬µÚ10Èı´Î¼äÖ·:16GB
-    unsigned int block_num;     //ÎÄ¼şËùÊ¹ÓÃµÄ´ÅÅÌ¿éµÄÊµ¼ÊÊıÄ¿
-    unsigned int file_size;     //ÎÄ¼ş´óĞ¡
-    unsigned short link_count;  //ÎÄ¼şÁ´½Ó¼ÆÊı
-    time_t last_time;           //ÉÏ´ÎÎÄ¼ş´æÈ¡Ê±¼ä
+    unsigned short owner;       //è¯¥æ–‡ä»¶æ‰€æœ‰è€…çš„ID
+    unsigned short group;       //è¯¥æ–‡ä»¶ç”¨æˆ·ç»„çš„ID
+    unsigned short file_type;   //0:æ­£è§„æ–‡ä»¶ 1:ç›®å½•æ–‡ä»¶ 2:ç‰¹åˆ«æ–‡ä»¶
+    unsigned short mode;        //rwx r-x r-x æ‰€æœ‰è€…æƒé™+ç»„æƒé™+å…¶ä»–äººæƒé™
+    unsigned int addr[ADDR_N];  //æ–‡ä»¶ç‰©ç†åœ°å€ï¼Œå‰7ä¸ªç›´æ¥:7KBï¼Œç¬¬8ä¸€æ¬¡é—´å€:256KBï¼Œç¬¬9äºŒæ¬¡é—´å€:64MBï¼Œç¬¬10ä¸‰æ¬¡é—´å€:16GB
+    unsigned int block_num;     //æ–‡ä»¶æ‰€ä½¿ç”¨çš„ç£ç›˜å—çš„å®é™…æ•°ç›®
+    unsigned int file_size;     //æ–‡ä»¶å¤§å°
+    unsigned short link_count;  //æ–‡ä»¶é“¾æ¥è®¡æ•°
+    time_t last_time;           //ä¸Šæ¬¡æ–‡ä»¶å­˜å–æ—¶é—´
 };
 
-/* i½Úµã */
+/* ièŠ‚ç‚¹ */
 struct INode {
-    unsigned int di_number;     //´ÅÅÌi½Úµã±àºÅ
-    char state;                 //×´Ì¬£¬Ö¸Ê¾i½ÚµãÊÇ·ñÉÏËø»ò±»ĞŞ¸Ä
-    unsigned int access_count;  //·ÃÎÊ¼ÆÊı£¬ÓĞ½ø³Ì·ÃÎÊi½ÚµãÊ±£¬¼ÆÊı¼Ó1
-    //ÎÄ¼şËùÊôÎÄ¼şÏµÍ³µÄÂß¼­Éè±¸ºÅ
-    //Á´½ÓÖ¸Õë£ºÖ¸Ïò¿ÕÏĞÁ´±íºÍÉ¢ÁĞ¶ÓÁĞ
-    unsigned short owner;       //¸ÃÎÄ¼şÓµÓĞÕßµÄID
-    unsigned short group;       //¸ÃÎÄ¼şÓÃ»§×éµÄID
-    unsigned short file_type;   //0:Õı¹æÎÄ¼ş 1:Ä¿Â¼ÎÄ¼ş 2:ÌØ±ğÎÄ¼ş
-    unsigned short mode;        //´æÈ¡È¨ÏŞ
-    unsigned int addr[ADDR_N];  //ÎÄ¼şÎïÀíµØÖ·£¬Ç°6¸öÖ±½Ó:6KB£¬µÚ7Ò»´Î¼äÖ·:256KB£¬µÚ8¶ş´Î¼äÖ·:64MB£¬µÚ9Èı´Î¼äÖ·:16GB
-    unsigned int block_num;     //ÎÄ¼şËùÊ¹ÓÃµÄ´ÅÅÌ¿éµÄÊµ¼ÊÊıÄ¿
-    unsigned int file_size;     //ÎÄ¼ş³¤¶È
-    unsigned short link_count;  //ÎÄ¼şÁ´½Ó¼ÆÊı
-    time_t last_time;           //ÉÏ´ÎÎÄ¼şĞŞ¸ÄÊ±¼ä
+    unsigned int di_number;     //ç£ç›˜ièŠ‚ç‚¹ç¼–å·
+    char state;                 //çŠ¶æ€ï¼ŒæŒ‡ç¤ºièŠ‚ç‚¹æ˜¯å¦ä¸Šé”æˆ–è¢«ä¿®æ”¹
+    unsigned int access_count;  //è®¿é—®è®¡æ•°ï¼Œæœ‰è¿›ç¨‹è®¿é—®ièŠ‚ç‚¹æ—¶ï¼Œè®¡æ•°åŠ 1
+    //æ–‡ä»¶æ‰€å±æ–‡ä»¶ç³»ç»Ÿçš„é€»è¾‘è®¾å¤‡å·
+    //é“¾æ¥æŒ‡é’ˆï¼šæŒ‡å‘ç©ºé—²é“¾è¡¨å’Œæ•£åˆ—é˜Ÿåˆ—
+    unsigned short owner;       //è¯¥æ–‡ä»¶æ‹¥æœ‰è€…çš„ID
+    unsigned short group;       //è¯¥æ–‡ä»¶ç”¨æˆ·ç»„çš„ID
+    unsigned short file_type;   //0:æ­£è§„æ–‡ä»¶ 1:ç›®å½•æ–‡ä»¶ 2:ç‰¹åˆ«æ–‡ä»¶
+    unsigned short mode;        //å­˜å–æƒé™
+    unsigned int addr[ADDR_N];  //æ–‡ä»¶ç‰©ç†åœ°å€ï¼Œå‰6ä¸ªç›´æ¥:6KBï¼Œç¬¬7ä¸€æ¬¡é—´å€:256KBï¼Œç¬¬8äºŒæ¬¡é—´å€:64MBï¼Œç¬¬9ä¸‰æ¬¡é—´å€:16GB
+    unsigned int block_num;     //æ–‡ä»¶æ‰€ä½¿ç”¨çš„ç£ç›˜å—çš„å®é™…æ•°ç›®
+    unsigned int file_size;     //æ–‡ä»¶é•¿åº¦
+    unsigned short link_count;  //æ–‡ä»¶é“¾æ¥è®¡æ•°
+    time_t last_time;           //ä¸Šæ¬¡æ–‡ä»¶ä¿®æ”¹æ—¶é—´
 };
 
-/* ·ûºÅÎÄ¼şÄ¿Â¼Ïî Ò»Ïî24B */
+/* ç¬¦å·æ–‡ä»¶ç›®å½•é¡¹ ä¸€é¡¹24B */
 struct SFD {
-    char file_name[F_N_SIZE];   //ÎÄ¼şÃû
-    unsigned int di_number;     //´ÅÅÌi½Úµã±àºÅ
+    char file_name[F_N_SIZE];   //æ–‡ä»¶å
+    unsigned int di_number;     //ç£ç›˜ièŠ‚ç‚¹ç¼–å·
 };
 
-/* ÓÃ»§´ò¿ªÎÄ¼ş±íÏî */
+/* ç”¨æˆ·æ‰“å¼€æ–‡ä»¶è¡¨é¡¹ */
 struct OFD {
-    char file_name[F_N_SIZE];   //´ò¿ªµÄÎÄ¼şÃû
+    char file_name[F_N_SIZE];   //æ‰“å¼€çš„æ–‡ä»¶å
     unsigned short flag;
-    char opf_protect[3];        //±£»¤Âë
-    unsigned int rw_point;      //¶ÁĞ´Ö¸Õë
-    unsigned int inode_number;  //ÄÚ´æi½Úµã±àºÅ
+    char opf_protect[3];        //ä¿æŠ¤ç 
+    unsigned int rw_point;      //è¯»å†™æŒ‡é’ˆ
+    unsigned int inode_number;  //å†…å­˜ièŠ‚ç‚¹ç¼–å·
 };
 
-/* ÓÃ»§ */
+/* ç”¨æˆ· */
 struct User {
-    char user_name[16];         //ÓÃ»§Ãû
-    char password[16];          //ÓÃ»§ÃÜÂë
-    unsigned short user_id;     //ÓÃ»§ID
+    char user_name[16];         //ç”¨æˆ·å
+    char password[16];          //ç”¨æˆ·å¯†ç 
+    unsigned short user_id;     //ç”¨æˆ·ID
 };
 
-/* ÄÚ´æÖĞÓÃ»§ĞÅÏ¢ */
+/* å†…å­˜ä¸­ç”¨æˆ·ä¿¡æ¯ */
 struct User_Mem {
-    struct OFD OFD[OPEN_NUM];   //ÓÃ»§´ò¿ªÎÄ¼ş±í
-    unsigned short file_count;  //´ò¿ªÎÄ¼şÊı
-    struct INode *cur_dir;      //µ±Ç°Ä¿Â¼i½Úµã
-    char cwd[100];              //µ±Ç°Ä¿Â¼
+    struct OFD OFD[OPEN_NUM];   //ç”¨æˆ·æ‰“å¼€æ–‡ä»¶è¡¨
+    unsigned short file_count;  //æ‰“å¼€æ–‡ä»¶æ•°
+    struct INode *cur_dir;      //å½“å‰ç›®å½•ièŠ‚ç‚¹
+    char cwd[100];              //å½“å‰ç›®å½•
 };
 
-/* ÓÃ»§×é */
+/* ç”¨æˆ·ç»„ */
 struct Group {
-    unsigned short user_id[GROUP_USER_NUM]; //Ã¿¸ö×é×î¶à5¸öÓÃ»§
-    unsigned short group_id;     //ÓÃ»§×éID
+    unsigned short user_id[GROUP_USER_NUM]; //æ¯ä¸ªç»„æœ€å¤š5ä¸ªç”¨æˆ·
+    unsigned short group_id;     //ç”¨æˆ·ç»„ID
 };
 
 class DISK_ALLOCATE {
@@ -127,28 +127,31 @@ public:
     void allocate_all();
 };
 
+void disk_read_d(char *buf, unsigned int id);
 
+void disk_write_d(char *buf, unsigned int id);
+
+extern FILE *fp;
 extern bitset<DINODE_BLK> bitmap;
-extern struct INode sys_open_file[SYS_OPEN_FILE];   //ÏµÍ³´ò¿ªÎÄ¼ş±í
-extern short sys_open_file_count;       //ÏµÍ³´ò¿ªÎÄ¼şÊıÄ¿
-extern struct User user[USER_NUM];      //ÓÃ»§±í 340B
+extern struct INode sys_open_file[SYS_OPEN_FILE];   //ç³»ç»Ÿæ‰“å¼€æ–‡ä»¶è¡¨
+extern short sys_open_file_count;       //ç³»ç»Ÿæ‰“å¼€æ–‡ä»¶æ•°ç›®
+extern struct User user[USER_NUM];      //ç”¨æˆ·è¡¨ 340B
 extern struct User_Mem user_mem[USER_NUM];
-extern struct Group group[GROUP_NUM];   //ÓÃ»§×é
-extern int user_count;                  //ÓÃ»§Êı
-extern int group_count;                 //ÓÃ»§×éÊı
-//extern struct SuperBlock super_block;   //³¬¼¶¿é
-extern char disk_buf[DISK_BUF][BLOCK_SIZE]; //´ÅÅÌ»º³åÇø
-extern int tag[DISK_BUF];               //Ã¿¿é´ÅÅÌ»º³åÇøµÄtag
-extern class DISK_ALLOCATE disk;
+extern struct Group group[GROUP_NUM];   //ç”¨æˆ·ç»„
+extern int user_count;                  //ç”¨æˆ·æ•°
+extern int group_count;                 //ç”¨æˆ·ç»„æ•°
+//extern struct SuperBlock super_block;   //è¶…çº§å—
+extern char disk_buf[DISK_BUF][BLOCK_SIZE]; //ç£ç›˜ç¼“å†²åŒº
+extern int tag[DISK_BUF];               //æ¯å—ç£ç›˜ç¼“å†²åŒºçš„tag
+extern class DISK_ALLOCATE disk;        //
+extern unsigned short cur_user;         //å½“å‰ç”¨æˆ·ID
+extern unsigned short umod;             //é»˜è®¤æƒé™ç ï¼Œé»˜è®¤644ï¼Œç›®å½•644+111=755
 
-extern unsigned short cur_user;         //µ±Ç°ÓÃ»§ID
-extern unsigned short umod;             //Ä¬ÈÏÈ¨ÏŞÂë£¬Ä¬ÈÏ644£¬Ä¿Â¼644+111=755
+void disk_read(char *buf, int id); //æŠŠidç£ç›˜å—è¯»åˆ°ç”¨æˆ·è‡ªå®šä¹‰çš„buf
 
-void disk_read(char *buf, int id); //°Ñid´ÅÅÌ¿é¶Áµ½ÓÃ»§×Ô¶¨ÒåµÄbuf
+void disk_write(char *buf, int id);//æŠŠbufå†…å®¹å†™åˆ°ç£ç›˜çš„idå—
 
-void disk_write(char *buf, int id);//°ÑbufÄÚÈİĞ´µ½´ÅÅÌµÄid¿é
-
-void init_buf(); //³õÊ¼»¯»º³åÇø
+void init_buf(); //åˆå§‹åŒ–ç¼“å†²åŒº
 
 void all_write_back();
 
@@ -159,10 +162,6 @@ void store();
 void restore();
 
 void init();
-
-void disk_read_d(char *buf, unsigned int id);
-
-void disk_write_d(char *buf, unsigned int id);
 
 void dinode_read(struct DINode &DINode, unsigned int di_number);
 
