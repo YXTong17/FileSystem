@@ -2,68 +2,54 @@
 #include <iostream>
 #include <cstring>
 
-void disk_read_d(char *buf, unsigned int id) {
-    FILE *f = fopen("disk", "rb");
-    fseek(f, (long) id * BLOCK_SIZE, 0);
-    fread(buf, BLOCK_SIZE, 1, f);
-    fclose(f);
-}
-
-void disk_write_d(char *buf, unsigned int id) {
-    FILE *f = fopen("disk", "r+b");
-    fseek(f, (long) id * BLOCK_SIZE, 0);
-    fwrite(buf, BLOCK_SIZE, 1, f);
-    fclose(f);
-}
-
 /*!
- * ¶Á´ÅÅÌi½Úµã
- * @param DINode ´ÅÅÌi½ÚµãÏîÄ¿
- * @param di_number ´ÅÅÌi½Úµã±àºÅ
+ * è¯»ç£ç›˜ièŠ‚ç‚¹
+ * @param DINode ç£ç›˜ièŠ‚ç‚¹é¡¹ç›®
+ * @param di_number ç£ç›˜ièŠ‚ç‚¹ç¼–å·
  */
 void dinode_read(struct DINode &DINode, unsigned int di_number) {
-    // ¸ù¾İ´ÅÅÌi½Úµã±àºÅ£¬¼ÆËãÏàÓ¦µÄ´ÅÅÌ¿éºÅÓëÎ»ÖÃ£¬ÒòÎªÃ¿¿é´æ´¢16¸ö´ÅÅÌi½Úµã
+    // æ ¹æ®ç£ç›˜ièŠ‚ç‚¹ç¼–å·ï¼Œè®¡ç®—ç›¸åº”çš„ç£ç›˜å—å·ä¸ä½ç½®ï¼Œå› ä¸ºæ¯å—å­˜å‚¨16ä¸ªç£ç›˜ièŠ‚ç‚¹
     unsigned int real_addr = 10 + di_number / 16;
     unsigned int offset = di_number % 16;
     char block[BLOCK_SIZE] = {0};
-    disk_read_d(block, (int) real_addr);
+    disk_read(block, (int) real_addr);
     struct DINode buf[16];
     memcpy(buf, block, BLOCK_SIZE);
     memcpy(&DINode, &buf[offset], DINODE_SIZE);
 }
 
 /*!
- * Ğ´´ÅÅÌi½Úµã
- * @param DINode ´ÅÅÌi½ÚµãÏîÄ¿
- * @param di_number ´ÅÅÌi½Úµã±àºÅ
+ * å†™ç£ç›˜ièŠ‚ç‚¹
+ * @param DINode ç£ç›˜ièŠ‚ç‚¹é¡¹ç›®
+ * @param di_number ç£ç›˜ièŠ‚ç‚¹ç¼–å·
  */
 void dinode_write(const struct DINode &DINode, unsigned int di_number) {
-    // ¸ù¾İ´ÅÅÌi½Úµã±àºÅ£¬¼ÆËãÏàÓ¦µÄ´ÅÅÌ¿éºÅÓëÎ»ÖÃ£¬ÒòÎªÃ¿¿é´æ´¢16¸ö´ÅÅÌi½Úµã
+    // æ ¹æ®ç£ç›˜ièŠ‚ç‚¹ç¼–å·ï¼Œè®¡ç®—ç›¸åº”çš„ç£ç›˜å—å·ä¸ä½ç½®ï¼Œå› ä¸ºæ¯å—å­˜å‚¨16ä¸ªç£ç›˜ièŠ‚ç‚¹
     unsigned int real_addr = 10 + di_number / 16;
     unsigned int offset = di_number % 16;
     char block[BLOCK_SIZE] = {0};
-    disk_read_d(block, (int) real_addr);
+    disk_read(block, (int) real_addr);
     struct DINode buf[16];
     memcpy(buf, block, BLOCK_SIZE);
-    // ĞŞ¸Ä²¢Ğ´»Ø
-    memcpy(&buf[offset], &DINode, DINODE_SIZE); // ĞŞ¸Ä½á¹¹Ìå
-    memcpy(block, buf, BLOCK_SIZE); // °ü×°³É´ÅÅÌ¿é
-    disk_write_d(block, (int) real_addr);
+    // ä¿®æ”¹å¹¶å†™å›
+    memcpy(&buf[offset], &DINode, DINODE_SIZE); // ä¿®æ”¹ç»“æ„ä½“
+    memcpy(block, buf, BLOCK_SIZE); // åŒ…è£…æˆç£ç›˜å—
+    disk_write(block, (int) real_addr);
 }
 
 /*!
- * ÔÚµ±Ç°Ä¿Â¼´´½¨×ÓÄ¿Â¼
- * @param file_name Ä¿Â¼Ãû
- * @return ´ÅÅÌi½ÚµãµØÖ·£¬Ê§°Ü»á´òÓ¡ĞÅÏ¢²¢·µ»Ø0
+ * åœ¨å½“å‰ç›®å½•åˆ›å»ºå­ç›®å½•
+ * @param file_name ç›®å½•å
+ * @return ç£ç›˜ièŠ‚ç‚¹åœ°å€ï¼Œå¤±è´¥ä¼šæ‰“å°ä¿¡æ¯å¹¶è¿”å›0
  */
 unsigned int creat_directory(char *file_name) {
-    if (bitmap.all()) {//ËùÓĞi½Úµã¶¼±»·ÖÅä
-        cout << "Ê§°Ü£ºËùÓĞi½Úµã¶¼±»·ÖÅä" << endl;
+    if (bitmap.all()) {//æ‰€æœ‰ièŠ‚ç‚¹éƒ½è¢«åˆ†é…
+        cout << "å¤±è´¥ï¼šæ‰€æœ‰ièŠ‚ç‚¹éƒ½è¢«åˆ†é…" << endl;
         return 0;
     }
     unsigned short umod_d = umod + 111;
-    // ´´½¨×ÓÄ¿Â¼µÄ´ÅÅÌi½Úµã
-    struct DINode new_director = {
+    // åˆ›å»ºå­ç›®å½•çš„ç£ç›˜ièŠ‚ç‚¹
+    struct DINode new_directory = {
             .owner = cur_user,
             .group = 0,
             .file_type = 1,
@@ -74,59 +60,59 @@ unsigned int creat_directory(char *file_name) {
             .link_count = 0,
             .last_time = time((time_t *) nullptr)
     };
-    // ÕÒµ½µ±Ç°Ä¿Â¼µÄSFD
+    // æ‰¾åˆ°å½“å‰ç›®å½•çš„SFD
     char block[BLOCK_SIZE] = {0};
-    disk_read_d(block, (int) user_mem[cur_user].cur_dir->addr[0]);
-    // ¶Á³ÉSFD½á¹¹Ìå
+    disk_read(block, (int) user_mem[cur_user].cur_dir->addr[0]);
+    // è¯»æˆSFDç»“æ„ä½“
     struct SFD SFD[DIR_NUM];
     memcpy(SFD, block, sizeof(SFD));
     int index, index_i, flag = 1, i;
-    // ĞŞ¸ÄSFD£¬ÕÒµ½¿ÕÏĞ´ÅÅÌi½Úµã
+    // ä¿®æ”¹SFDï¼Œæ‰¾åˆ°ç©ºé—²ç£ç›˜ièŠ‚ç‚¹
     for (i = 0; i < DIR_NUM; i++) {
-        // ÕÒµ½¿ÕÏĞSFDÀ¸
+        // æ‰¾åˆ°ç©ºé—²SFDæ 
         if (SFD[i].di_number == 0) {
             index = i;
             flag = 0;
             break;
         }
         if (strcmp(SFD[i].file_name, file_name) == 4) {
-            cout << "Ê§°Ü£ºÃüÃûÖØ¸´" << endl;
+            cout << "å¤±è´¥ï¼šå‘½åé‡å¤" << endl;
             return 0;
         }
     }
-    // ¼ÌĞø²éÖØÃû
+    // ç»§ç»­æŸ¥é‡å
     for (; i < DIR_NUM; i++) {
         if (strcmp(SFD[i].file_name, file_name) == 4) {
-            cout << "Ê§°Ü£ºÃüÃûÖØ¸´" << endl;
+            cout << "å¤±è´¥ï¼šå‘½åé‡å¤" << endl;
             return 0;
         }
     }
     if (flag) {
-        cout << "Ê§°Ü£ºÄ¿Â¼ÒÑÂú" << endl;
+        cout << "å¤±è´¥ï¼šç›®å½•å·²æ»¡" << endl;
         return 0;
     }
     for (index_i = 0; index_i < DINODE_COUNT; index_i++)
-        // ÕÒµ½¿ÕÏĞi½Úµã
+        // æ‰¾åˆ°ç©ºé—²ièŠ‚ç‚¹
         if (bitmap[index_i] == 0) {
             strcpy(SFD[index].file_name, file_name);
             SFD[index].di_number = index_i;
             bitmap[index_i] = true;
             break;
         }
-    // Ğ´´ÅÅÌi½Úµã
-    dinode_write(new_director, index_i);
-    // SFDĞ´»Ø´ÅÅÌ
+    // å†™ç£ç›˜ièŠ‚ç‚¹
+    dinode_write(new_directory, index_i);
+    // SFDå†™å›ç£ç›˜
     memcpy(block, SFD, sizeof(SFD));
-    disk_write_d(block, (int) user_mem[cur_user].cur_dir->addr[0]);
-    return new_director.addr[0];
+    disk_write(block, (int) user_mem[cur_user].cur_dir->addr[0]);
+    return new_directory.addr[0];
 }
 
 /*!
- * ÓÉ´ÅÅÌi½ÚµãÉú³É¶ÔÓ¦µÄÄÚ´æi½Úµã
- * @param INode ÒªĞŞ¸ÄµÄÄÚ´æi½Úµã
- * @param DINode ´ÅÅÌi½ÚµãÖ¸Õë
- * @param di_number ´ÅÅÌi½Úµã±àºÅ
- * @return ÄÚ´æi½ÚµãÖ¸Õë
+ * ç”±ç£ç›˜ièŠ‚ç‚¹ç”Ÿæˆå¯¹åº”çš„å†…å­˜ièŠ‚ç‚¹
+ * @param INode è¦ä¿®æ”¹çš„å†…å­˜ièŠ‚ç‚¹
+ * @param DINode ç£ç›˜ièŠ‚ç‚¹æŒ‡é’ˆ
+ * @param di_number ç£ç›˜ièŠ‚ç‚¹ç¼–å·
+ * @return å†…å­˜ièŠ‚ç‚¹æŒ‡é’ˆ
  */
 void get_inode(struct INode &INode, const struct DINode &DINode, unsigned int di_number) {
     INode.di_number = di_number;
@@ -145,7 +131,7 @@ void get_inode(struct INode &INode, const struct DINode &DINode, unsigned int di
 
 void ls() {
     char block[BLOCK_SIZE] = {0};
-    disk_read_d(block, (int) user_mem[cur_user].cur_dir->addr[0]);
+    disk_read(block, (int) user_mem[cur_user].cur_dir->addr[0]);
     struct SFD SFD[DIR_NUM];
     memcpy(SFD, block, sizeof(SFD));
     int count = 0;
@@ -154,5 +140,5 @@ void ls() {
             cout << index.file_name << endl;
             count++;
         }
-    cout << "¹²" << count << "Ïî" << endl;
+    cout << "å…±" << count << "é¡¹" << endl;
 }
