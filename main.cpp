@@ -1,20 +1,21 @@
 #include "filesys.h"
 #include <iostream>
 
+FILE *fp;
 bitset<DINODE_BLK> bitmap;
-struct INode sys_open_file[SYS_OPEN_FILE];   //ÏµÍ³´ò¿ªÎÄ¼ş±í
-short sys_open_file_count;       //ÏµÍ³´ò¿ªÎÄ¼şÊıÄ¿
-struct User user[USER_NUM];      //ÓÃ»§±í
+struct INode sys_open_file[SYS_OPEN_FILE];   //ç³»ç»Ÿæ‰“å¼€æ–‡ä»¶è¡¨
+short sys_open_file_count;       //ç³»ç»Ÿæ‰“å¼€æ–‡ä»¶æ•°ç›®
+struct User user[USER_NUM];      //ç”¨æˆ·è¡¨
 struct User_Mem user_mem[USER_NUM];
-struct Group group[GROUP_NUM];   //ÓÃ»§×é
-int user_count;                  //ÓÃ»§Êı
-int group_count;                 //ÓÃ»§×éÊı
-//struct SuperBlock super_block;   //³¬¼¶¿é
-char disk_buf[DISK_BUF][BLOCK_SIZE]; //´ÅÅÌ»º³åÇø
-int tag[DISK_BUF];               //Ã¿¿é´ÅÅÌ»º³åÇøµÄtag
+struct Group group[GROUP_NUM];   //ç”¨æˆ·ç»„
+int user_count;                  //ç”¨æˆ·æ•°
+int group_count;                 //ç”¨æˆ·ç»„æ•°
+//struct SuperBlock super_block;   //è¶…çº§å—
+char disk_buf[DISK_BUF][BLOCK_SIZE]; //ç£ç›˜ç¼“å†²åŒº
+int tag[DISK_BUF];               //æ¯å—ç£ç›˜ç¼“å†²åŒºçš„tag
 DISK_ALLOCATE disk;
-unsigned short cur_user;         //µ±Ç°ÓÃ»§ID
-unsigned short umod;             //Ä¬ÈÏÈ¨ÏŞÂë£¬Ä¬ÈÏ644£¬Ä¿Â¼644+111=755
+unsigned short cur_user;         //å½“å‰ç”¨æˆ·ID
+unsigned short umod;             //é»˜è®¤æƒé™ç ï¼Œé»˜è®¤644ï¼Œç›®å½•644+111=755
 
 int main() {
     init();
@@ -23,5 +24,7 @@ int main() {
     ls();
     all_write_back();
     store();
+    fclose(fp);
+//    system("pause");
     return 0;
 }
