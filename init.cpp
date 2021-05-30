@@ -70,12 +70,12 @@ void store() {
     disk.store_super_block();
     disk_write(block, 0);
     // bitmap
-    char bitmap_c[DINODE_BLK] = {0};
+    char bitmap_c[DINODE_COUNT] = {0};
     p = bitmap_c;
     memcpy(bitmap_c, &bitmap, sizeof(bitmap));
     for (int i = 2; i < 10; i++) {
         disk_write(p, i);
-        p += sizeof(bitmap);
+        p += BLOCK_SIZE;
     }
 }
 
