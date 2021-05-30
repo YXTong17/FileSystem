@@ -22,8 +22,9 @@ int main() {
 //    for (int i = 0; i < 19; i++)
 //        creat_directory((char *) "abc");
     ls();
-    all_write_back();
     store();
+    // 必须放在最后的两个函数
+    all_write_back();
     fclose(fp);
 //    system("pause");
     return 0;
