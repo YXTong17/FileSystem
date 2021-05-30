@@ -132,7 +132,7 @@ void disk_read_d(char *buf, unsigned int id);
 void disk_write_d(char *buf, unsigned int id);
 
 extern FILE *fp;
-extern bitset<DINODE_BLK> bitmap;
+extern bitset<DINODE_COUNT> bitmap;
 extern struct INode sys_open_file[SYS_OPEN_FILE];   //系统打开文件表
 extern short sys_open_file_count;       //系统打开文件数目
 extern struct User user[USER_NUM];      //用户表 340B
