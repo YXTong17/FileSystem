@@ -2,7 +2,7 @@
 #include <iostream>
 
 FILE *fp;
-bitset<DINODE_BLK> bitmap;
+bitset<DINODE_COUNT> bitmap;
 struct INode sys_open_file[SYS_OPEN_FILE];   //系统打开文件表
 short sys_open_file_count;       //系统打开文件数目
 struct User user[USER_NUM];      //用户表
