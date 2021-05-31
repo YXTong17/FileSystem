@@ -19,13 +19,13 @@ memcpy(SFD, block, sizeof(SFD));
 | pwd   | 显示当前路径                    |
 | open  | 打开文件 √?                     |
 | close | 关闭文件 √?                     |
-| read  | 读取文件内容                    |
-| write | 写入文件                        |
+| read  | 读取文件内容 ?                  |
+| write | 写入文件 ?                      |
 | touch | 建立一个新的文件 / 改变读取时间 ? |
 | rm    | 删除文件 ?                      |
 | mkdir | 创建目录 √                      |
 | rmdir | 删除目录 ?                      |
-| cp    | 文件复制                        |
+| cp    | 文件复制 ?                      |
 | mv    | 移动 / 改变文件名               |
 | ln    | 建立文件链接                    |
 | chmod | 改变文件权限                    |
