@@ -18,6 +18,7 @@ void ls() {
             count++;
         }
     cout << "共" << count << "项" << endl;
+    cout << user_mem[cur_user].cwd << endl;
 }
 
 /*!
@@ -120,8 +121,8 @@ void instruct_cd(const string &dest_addr) {
     //回到上级目录
     if (dest_addr_split_items.size() == 1 && dest_addr_split_items[0] == "..") {
         //dest_addr == ../
-        if(cwd_split_items.size() == 1){
-            cout<<"previous directory not found when in root."<<endl;
+        if (cwd_split_items.size() == 1) {
+            cout << "previous directory not found when in root." << endl;
             return;
         }
         string fore_dir = cwd_split_items[cwd_split_items.size() - 2];
@@ -131,6 +132,13 @@ void instruct_cd(const string &dest_addr) {
             if (OFD_iter.flag == 1 && OFD_iter.file_name == fore_dir) {
                 // 在函数内按INode.state判断是否需要将内存inode写回磁盘#3,并删除系统文件打开表的相应项
                 dinode_write(user_mem[cur_user].cur_dir->di_number);
+                //?????????????????????????????????????把这个循环提前到cwd_split_items被pop之前了
+                for (auto &curr_OFD_iter : user_mem[cur_user].OFD) {
+                    if (curr_OFD_iter.file_name == cwd_split_items.back()) {
+                        curr_OFD_iter.flag = 0;         //????????????????????????????????????????????????????????????????????????????????
+                        break;
+                    }
+                }
                 string new_dir;
                 cwd_split_items.pop_back();
                 for (auto &dir_iter: cwd_split_items) {
@@ -140,15 +148,10 @@ void instruct_cd(const string &dest_addr) {
                 new_dir += "/";
                 // 更改当前工作目录, 更改当前工作目录的内存inode指针,
                 // 删除退出文件夹对应用户打开文件表OFD项, 用户打开文件计数--
-                new_dir.copy(user_mem[cur_user].cwd, new_dir.length(), 0);
+//                new_dir.copy(user_mem[cur_user].cwd, 100, 0);     //??????????????????????????????????????????????
+                strcpy(user_mem[cur_user].cwd, new_dir.c_str());
                 user_mem[cur_user].cur_dir = &sys_open_file[OFD_iter.inode_number];
                 user_mem[cur_user].file_count--;
-                for (auto &curr_OFD_iter : user_mem[cur_user].OFD) {
-                    if (curr_OFD_iter.file_name == cwd_split_items.back()) {
-                        curr_OFD_iter.flag = 0;
-                        break;
-                    }
-                }
                 fore_dir_OFD_find_flag = true;
                 break;
             }
@@ -183,8 +186,8 @@ void instruct_cd(const string &dest_addr) {
                 }
             }
             //未从SFD中找到要打开的文件
-            if(cur_dir_open_dinode_num == 0){
-                cout<<"file: "<<new_dir<<" not found"<<endl;
+            if (cur_dir_open_dinode_num == 0) {
+                cout << "file: " << new_dir << " not found" << endl;
                 return;
             }
             unsigned int inode_num = dinode_read(cur_dir_open_dinode_num);
@@ -202,14 +205,16 @@ void instruct_cd(const string &dest_addr) {
             } else {
                 // 更改当前工作目录, 更改当前工作目录的内存inode指针,
                 // 增添进入文件夹对应用户打开文件表OFD项, 用户打开文件计数++
-                new_dir.copy(user_mem[cur_user].cwd, new_dir.length(), 0);
+//                new_dir.copy(user_mem[cur_user].cwd, new_dir.length(), 0);     //??????????????????????????????????????????????
+                strcpy(user_mem[cur_user].cwd, new_dir.c_str());
                 user_mem[cur_user].cur_dir = &inode;
                 user_mem[cur_user].file_count++;
                 for (auto &curr_OFD_iter : user_mem[cur_user].OFD) {
                     if (curr_OFD_iter.flag == 0) {
                         curr_OFD_iter.flag = 1;
-                        dest_addr_split_items_iter.copy(curr_OFD_iter.file_name,
-                                                        dest_addr_split_items_iter.length(), 0);
+//                        dest_addr_split_items_iter.copy(curr_OFD_iter.file_name,
+//                                                        dest_addr_split_items_iter.length(), 0);     //??????????????????????????????????????????????
+                        strcpy(curr_OFD_iter.file_name, dest_addr_split_items_iter.c_str());
                         curr_OFD_iter.inode_number = inode_num;
                         break;
                     }
