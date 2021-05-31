@@ -120,6 +120,10 @@ void instruct_cd(const string &dest_addr) {
     //回到上级目录
     if (dest_addr_split_items.size() == 1 && dest_addr_split_items[0] == "..") {
         //dest_addr == ../
+        if(cwd_split_items.size() == 1){
+            cout<<"previous directory not found when in root."<<endl;
+            return;
+        }
         string fore_dir = cwd_split_items[cwd_split_items.size() - 2];
         //在当前用户打开文件中查找上级目录名
         bool fore_dir_OFD_find_flag{false};
@@ -148,9 +152,6 @@ void instruct_cd(const string &dest_addr) {
                 fore_dir_OFD_find_flag = true;
                 break;
             }
-        }
-        if(fore_dir_OFD_find_flag == false){
-            cout<<"previous directory not found"<<endl;
         }
     }
         //打开当前目录下的文件路径,不进行回退
