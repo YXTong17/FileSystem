@@ -7,6 +7,13 @@
 
 using namespace std;
 
+#define DEBUG
+#ifdef DEBUG
+#define STR_EQUL 4
+#else
+#define STR_EQUL 0
+#endif
+
 #define BLOCK_SIZE 1024     //每块大小1KB
 #define SYS_OPEN_FILE 40    //系统打开文件表最大项数
 #define DIR_NUM 42          //每个目录所包含的最大目录项数（文件数）
@@ -163,9 +170,11 @@ void restore();
 
 void init();
 
-void dinode_read(struct DINode &DINode, unsigned int di_number);
+unsigned int dinode_read(unsigned int di_number);
 
-void dinode_write(const struct DINode &DINode, unsigned int di_number);
+void dinode_write(unsigned int di_number);
+
+void dinode_create(struct DINode DINode, unsigned int di_number);
 
 unsigned int creat_directory(char *file_name);
 
