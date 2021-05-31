@@ -3,36 +3,75 @@
 #include <cstring>
 
 /*!
- * 读磁盘i节点
- * @param DINode 磁盘i节点项目
+ * 读磁盘i节点，存到系统文件打开表中
  * @param di_number 磁盘i节点编号
+ * @return 相应的系统文件打开表地址，因为根目录常驻，所以返回值不可能为0
  */
-void dinode_read(struct DINode &DINode, unsigned int di_number) {
+unsigned int dinode_read(unsigned int di_number) {
     // 根据磁盘i节点编号，计算相应的磁盘块号与位置，因为每块存储16个磁盘i节点
+    int id;
     unsigned int real_addr = 10 + di_number / 16;
     unsigned int offset = di_number % 16;
     char block[BLOCK_SIZE] = {0};
     disk_read(block, (int) real_addr);
-    struct DINode buf[16];
-    memcpy(buf, block, BLOCK_SIZE);
-    memcpy(&DINode, &buf[offset], DINODE_SIZE);
+    struct DINode buf{};
+    memcpy(&buf, block + offset * DINODE_SIZE, DINODE_SIZE);
+    for (id = 0; id < SYS_OPEN_FILE; id++) {
+        if (sys_open_file[id].addr[0] == 0) {
+            get_inode(sys_open_file[id], buf, 0);
+            sys_open_file_count++;
+            return id;
+        }
+    }
+    cout << "error_dinode_read:系统文件打开表满，无法打开" << endl;
+    return 0;
 }
 
 /*!
- * 写磁盘i节点
- * @param DINode 磁盘i节点项目
+ * 写磁盘i节点，从系统文件打开表中删除
  * @param di_number 磁盘i节点编号
  */
-void dinode_write(const struct DINode &DINode, unsigned int di_number) {
+void dinode_write(unsigned int di_number) {
     // 根据磁盘i节点编号，计算相应的磁盘块号与位置，因为每块存储16个磁盘i节点
+    int id;
+    for (id = 0; id < SYS_OPEN_FILE; id++) {
+        // 找到在系统文件打开表中的位置
+        if (sys_open_file[id].di_number == di_number) {
+            if (sys_open_file[id].state == 'w') {
+                // 如果被修改，写回
+                unsigned int real_addr = 10 + di_number / 16;
+                unsigned int offset = di_number % 16;
+                char block[BLOCK_SIZE] = {0};
+                // 还是得读盘，因为一块里存有别的i节点
+                disk_read(block, (int) real_addr);
+                struct DINode buf[16];
+                memcpy(buf, block, BLOCK_SIZE);
+                // 修改并写回
+                memcpy(&buf[offset], &sys_open_file[id], DINODE_SIZE); // 修改
+                memcpy(block, buf, BLOCK_SIZE); // 包装成磁盘块
+                disk_write(block, (int) real_addr);
+            }
+            return;
+        }
+        cout << "error_dinode_write:系统未找到此内存i节点" << endl;
+    }
+}
+
+/*!
+ * 写入新磁盘i节点
+ * @param DINode 新磁盘i节点
+ * @param di_number 新磁盘i节点分配到的id
+ */
+void dinode_create(struct DINode DINode, unsigned int di_number) {
     unsigned int real_addr = 10 + di_number / 16;
     unsigned int offset = di_number % 16;
     char block[BLOCK_SIZE] = {0};
+    // 还是得读盘，因为一块里存有别的i节点
     disk_read(block, (int) real_addr);
     struct DINode buf[16];
     memcpy(buf, block, BLOCK_SIZE);
     // 修改并写回
-    memcpy(&buf[offset], &DINode, DINODE_SIZE); // 修改结构体
+    memcpy(&buf[offset], &DINode, DINODE_SIZE); // 修改
     memcpy(block, buf, BLOCK_SIZE); // 包装成磁盘块
     disk_write(block, (int) real_addr);
 }
@@ -75,14 +114,14 @@ unsigned int creat_directory(char *file_name) {
             flag = 0;
             break;
         }
-        if (strcmp(SFD[i].file_name, file_name) == 4) {
+        if (strcmp(SFD[i].file_name, file_name) == STR_EQUL) {
             cout << "失败：命名重复" << endl;
             return 0;
         }
     }
     // 继续查重名
     for (; i < DIR_NUM; i++) {
-        if (strcmp(SFD[i].file_name, file_name) == 4) {
+        if (strcmp(SFD[i].file_name, file_name) == STR_EQUL) {
             cout << "失败：命名重复" << endl;
             return 0;
         }
@@ -100,7 +139,7 @@ unsigned int creat_directory(char *file_name) {
             break;
         }
     // 写磁盘i节点
-    dinode_write(new_directory, index_i);
+    dinode_create(new_directory, index_i);
     // SFD写回磁盘
     memcpy(block, SFD, sizeof(SFD));
     disk_write(block, (int) user_mem[cur_user].cur_dir->addr[0]);
