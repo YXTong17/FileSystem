@@ -122,6 +122,7 @@ void instruct_cd(const string &dest_addr) {
         //dest_addr == ../
         string fore_dir = cwd_split_items[cwd_split_items.size() - 2];
         //在当前用户打开文件中查找上级目录名
+        bool fore_dir_OFD_find_flag{false};
         for (auto &OFD_iter : user_mem[cur_user].OFD) {
             if (OFD_iter.flag == 1 && OFD_iter.file_name == fore_dir) {
                 // 在函数内按INode.state判断是否需要将内存inode写回磁盘#3,并删除系统文件打开表的相应项
@@ -144,8 +145,12 @@ void instruct_cd(const string &dest_addr) {
                         break;
                     }
                 }
+                fore_dir_OFD_find_flag = true;
                 break;
             }
+        }
+        if(fore_dir_OFD_find_flag == false){
+            cout<<"previous directory not found"<<endl;
         }
     }
         //打开当前目录下的文件路径,不进行回退
@@ -175,6 +180,11 @@ void instruct_cd(const string &dest_addr) {
                     cur_dir_open_dinode_num = cur_dir_SFD_iter.di_number;
                     break;
                 }
+            }
+            //未从SFD中找到要打开的文件
+            if(cur_dir_open_dinode_num == 0){
+                cout<<"file: "<<new_dir<<" not found"<<endl;
+                return;
             }
             unsigned int inode_num = dinode_read(cur_dir_open_dinode_num);
             struct INode &inode = sys_open_file[inode_num];
