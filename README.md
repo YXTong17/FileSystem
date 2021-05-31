@@ -15,23 +15,24 @@ memcpy(SFD, block, sizeof(SFD));
 | 指令  | 功能                            |
 | ----- | ------------------------------- |
 | ls    | 显示文件目录 √                   |
-| cd    | 目录转换 √?                     |
+| cd    | 目录转换 √?h                     |
 | pwd   | 显示当前路径                    |
-| open  | 打开文件 √?                     |
-| close | 关闭文件 √?                     |
-| read  | 读取文件内容 ?                  |
-| write | 写入文件 ?                      |
-| touch | 建立一个新的文件 / 改变读取时间 ? |
-| rm    | 删除文件 ?                      |
+| open  | 打开文件 √?h                     |
+| close | 关闭文件 √?h                     |
+| read  | 读取文件内容 ?w                 |
+| write | 写入文件 ?w                     |
+| touch | 建立一个新的文件 / 改变读取时间 ?x |
+| rm    | 删除文件 ?t                      |
 | mkdir | 创建目录 √                      |
-| rmdir | 删除目录 ?                      |
-| cp    | 文件复制 ?                      |
+| rmdir | 删除目录 ?t                      |
+| cp    | 文件复制 ?w                     |
 | mv    | 移动 / 改变文件名               |
 | ln    | 建立文件链接                    |
 | chmod | 改变文件权限                    |
 | chown | 改变文件拥有者                  |
 | chgrp | 改变文件所属组                  |
 | umod  | 文件创建权限码                  |
+| vim   | 编辑文件 ?x                     |
 | ????  | 写大文件                        |
   
 ![系统or用户打开表结构图.png](https://i0.hdslb.com/bfs/album/4909cd5cb42187ccb2645cb3d2935628a4a2ee6a.png)  
