@@ -38,7 +38,7 @@ void creat_disk() {
     sys_open_file_count++;
     // i节点写入磁盘
     bitmap[0] = true;
-    dinode_write(root, 0);
+    dinode_create(root, 0);
     // 当前目录指向根目录
     user_mem[cur_user].cur_dir = &sys_open_file[0];
     strcpy(user_mem[cur_user].cwd, "/");
@@ -98,11 +98,11 @@ void restore() {
     // 超级块
     disk.restore_super_block();
     // bitmap
-    char bitmap_c[DINODE_BLK] = {0};
+    char bitmap_c[DINODE_COUNT] = {0};
     p = bitmap_c;
     for (int i = 2; i < 10; i++) {
         disk_read(p, i);
-        p += sizeof(bitmap);
+        p += BLOCK_SIZE;
     }
     memcpy(&bitmap, bitmap_c, sizeof(bitmap));
 }
@@ -124,10 +124,7 @@ void init() {
         /* 读取磁盘中的数据 */
         restore();
         // 读取根目录
-        struct DINode root{};
-        dinode_read(root, 0);
-        get_inode(sys_open_file[0], root, 0);
-        sys_open_file_count++;
+        dinode_read(0);
         user_mem[0].cur_dir = &sys_open_file[0];
         strcpy(user_mem->cwd, "/");
     }
