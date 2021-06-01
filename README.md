@@ -21,7 +21,7 @@ memcpy(SFD, block, sizeof(SFD));
 | close | 关闭文件 √?h                    |
 | read  | 读取文件内容 ?w                 |
 | write | 写入文件 ?w                     |
-| touch | 建立一个新的文件 √x             |
+| touch | 建立一个新的文件 √              |
 | rm    | 删除删除一个文件或者目录 √       |
 | mkdir | 创建目录 √                      |
 | rmdir | 删除空目录 √                    |
