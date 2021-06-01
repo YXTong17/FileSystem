@@ -139,11 +139,11 @@ void instruct_cd(const string &dest_addr) {
         //在当前用户打开文件中查找上级目录名
         for (auto &OFD_iter : user_mem[cur_user].OFD) {
             // OFD_iter.file_name 为绝对路径
-            if (OFD_iter.flag == 1 && OFD_iter.file_name == fore_dir) {
+            if (OFD_iter.flag == 1 && OFD_iter.file_dir == fore_dir) {
                 // 在函数内按INode.state判断是否需要将内存inode写回磁盘#3,并删除系统文件打开表的相应项
                 dinode_write(user_mem[cur_user].cur_dir->di_number);
                 for (auto &curr_OFD_iter : user_mem[cur_user].OFD) {
-                    if (curr_OFD_iter.file_name == cwd_split_items.back()) {
+                    if (curr_OFD_iter.file_dir == cwd_split_items.back()) {
                         curr_OFD_iter.flag = 0;
                         break;
                     }
@@ -157,14 +157,14 @@ void instruct_cd(const string &dest_addr) {
             }
         }
     }
-    //打开当前目录下的文件路径,不进行回退
+        //打开当前目录下的文件路径,不进行回退
     else if (dest_addr_split_items[0] == ".") {
         //dest_addr == "./a/b/c/"
         for (auto &dest_addr_split_items_iter : dest_addr_split_items) {
             if (dest_addr_split_items_iter == ".") { continue; }
-                // 要进入的文件夹的绝对路径
-                    string new_dir;
-                    cwd_split_items.push_back(dest_addr_split_items_iter);
+            // 要进入的文件夹的绝对路径
+            string new_dir;
+            cwd_split_items.push_back(dest_addr_split_items_iter);
             for (auto &cwd_split_items_iter : cwd_split_items) {
                 new_dir += "/";
                 new_dir += cwd_split_items_iter;
@@ -180,7 +180,7 @@ void instruct_cd(const string &dest_addr) {
             // 按文件名查找目录inode对应block中存储的SFD, 找到dinode_num
             unsigned int cur_dir_open_dinode_num{0};
             for (auto &cur_dir_SFD_iter : cur_dir_SFD) {
-                if (cur_dir_SFD_iter.file_name == new_dir) {
+                if (cur_dir_SFD_iter.file_name == dest_addr_split_items_iter) {
                     cur_dir_open_dinode_num = cur_dir_SFD_iter.di_number;
                     break;
                 }
@@ -211,7 +211,7 @@ void instruct_cd(const string &dest_addr) {
                 for (auto &curr_OFD_iter : user_mem[cur_user].OFD) {
                     if (curr_OFD_iter.flag == 0) {
                         curr_OFD_iter.flag = 1;
-                        strcpy(curr_OFD_iter.file_name, new_dir.c_str());
+                        strcpy(curr_OFD_iter.file_dir, new_dir.c_str());
                         curr_OFD_iter.inode_number = inode_num;
                         break;
                     }
@@ -245,7 +245,7 @@ void instruct_cd(const string &dest_addr) {
         }
         //回退后, ./ == /usr/
         instruct_cd(new_dir);
-    } else if(dest_addr_split_items.size() == 1 && dest_addr_split_items[0] == "~"){
+    } else if (dest_addr_split_items.size() == 1 && dest_addr_split_items[0] == "~") {
         //dest_addr == "~/"
         //new_dir == "/home/user_name/"
         string new_dir{};
@@ -263,4 +263,8 @@ void instruct_cd(const string &dest_addr) {
         new_dir += "/";
         instruct_cd(new_dir);
     }
+}
+
+void rm() {
+
 }
