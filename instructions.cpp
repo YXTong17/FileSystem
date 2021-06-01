@@ -110,10 +110,9 @@ void instruct_cd(const string &dest_addr) {
     for (sregex_iterator iter(dest_addr.begin(), dest_addr.end(), re); iter != end; iter++) {
         dest_addr_split_items.push_back(iter->str());
     }
-
     string current_dir = user_mem[cur_user].cwd;
     vector<string> cwd_split_items;
-    cwd_split_items.push_back("/");     //根目录标识
+
     for (sregex_iterator iter(current_dir.begin(), current_dir.end(), re); iter != end; iter++) {
         //cout<<iter->str()<<endl;
         cwd_split_items.push_back(iter->str());
@@ -212,7 +211,7 @@ void instruct_cd(const string &dest_addr) {
                 for (auto &curr_OFD_iter : user_mem[cur_user].OFD) {
                     if (curr_OFD_iter.flag == 0) {
                         curr_OFD_iter.flag = 1;
-                        strcpy(curr_OFD_iter.file_name, dest_addr_split_items_iter.c_str());
+                        strcpy(curr_OFD_iter.file_name, new_dir.c_str());
                         curr_OFD_iter.inode_number = inode_num;
                         break;
                     }
@@ -227,6 +226,7 @@ void instruct_cd(const string &dest_addr) {
         reverse(dest_addr_split_items.begin(), dest_addr_split_items.end());    //再转回来
         */
         reverse(cwd_split_items.begin(), cwd_split_items.end());    //反转cwd_split_items
+        cwd_split_items.push_back("/");     //根目录标识
         for (auto cwd_split_item_iter : cwd_split_items) {
             //假设/usr/为根目录, 关闭文件夹知道到达用户所在文件夹的下一级,即根目录/usr/
             if (cwd_split_item_iter == "/") { break; }
