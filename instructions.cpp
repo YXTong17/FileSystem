@@ -119,13 +119,39 @@ void instruct_cd(const string &dest_addr) {
     }
 
     //回到上级目录
-    if (dest_addr_split_items.size() == 1 && dest_addr_split_items[0] == "..") {
+     if (dest_addr[0] == '/') {
+        //dest_addr == "/usr/user1/a/b/c/"
+        /*
+        reverse(dest_addr_split_items.begin(), dest_addr_split_items.end());    //反转dest_addr_split_items
+        dest_addr_split_items.push_back("/");                                   //添加限定符
+        reverse(dest_addr_split_items.begin(), dest_addr_split_items.end());    //再转回来
+        */
+        reverse(cwd_split_items.begin(), cwd_split_items.end());    //反转cwd_split_items
+        cwd_split_items.push_back("/");     //根目录标识
+        for (auto cwd_split_item_iter : cwd_split_items) {
+            //假设/usr/为根目录, 关闭文件夹知道到达用户所在文件夹的下一级,即根目录/usr/
+            if (cwd_split_item_iter == "/") { break; }
+                //如果不是根目录就返回上一级目录
+            else {
+                instruct_cd("../");
+            }
+        }
+
+        //new_dir == "./usr/user1/a/b/c/"
+        string new_dir = "./";
+        for (auto &dest_addr_split_items_iter: dest_addr_split_items) {
+            if (dest_addr_split_items_iter == "~") { continue; }
+            new_dir += dest_addr_split_items_iter;
+            new_dir += "/";
+        }
+        //回退后, ./ == /usr/
+        instruct_cd(new_dir);
+    }else if (dest_addr_split_items[0] == "..") {
         //dest_addr == ../
-        if (cwd_split_items.size() == 1) {
+        if (cwd_split_items.size() == 0) {
             cout << "when in root, previous directory not found. " << endl;
             return;
         }
-        string cur_dir_name = cwd_split_items[cwd_split_items.size() - 1];
         //删去当前目录的文件名
         cwd_split_items.pop_back();
         string fore_dir;
@@ -137,13 +163,14 @@ void instruct_cd(const string &dest_addr) {
         fore_dir += "/";
 
         //在当前用户打开文件中查找上级目录名
+        string cur_dir = user_mem[cur_user].cwd;
         for (auto &OFD_iter : user_mem[cur_user].OFD) {
             // OFD_iter.file_name 为绝对路径
             if (OFD_iter.flag == 1 && OFD_iter.file_dir == fore_dir) {
                 // 在函数内按INode.state判断是否需要将内存inode写回磁盘#3,并删除系统文件打开表的相应项
                 dinode_write(user_mem[cur_user].cur_dir->di_number);
                 for (auto &curr_OFD_iter : user_mem[cur_user].OFD) {
-                    if (curr_OFD_iter.file_dir == cwd_split_items.back()) {
+                    if (curr_OFD_iter.file_dir == cur_dir) {
                         curr_OFD_iter.flag = 0;
                         break;
                     }
@@ -218,33 +245,6 @@ void instruct_cd(const string &dest_addr) {
                 }
             }
         }
-    } else if (dest_addr[0] == '/') {
-        //dest_addr == "/usr/user1/a/b/c/"
-        /*
-        reverse(dest_addr_split_items.begin(), dest_addr_split_items.end());    //反转dest_addr_split_items
-        dest_addr_split_items.push_back("/");                                   //添加限定符
-        reverse(dest_addr_split_items.begin(), dest_addr_split_items.end());    //再转回来
-        */
-        reverse(cwd_split_items.begin(), cwd_split_items.end());    //反转cwd_split_items
-        cwd_split_items.push_back("/");     //根目录标识
-        for (auto cwd_split_item_iter : cwd_split_items) {
-            //假设/usr/为根目录, 关闭文件夹知道到达用户所在文件夹的下一级,即根目录/usr/
-            if (cwd_split_item_iter == "/") { break; }
-                //如果不是根目录就返回上一级目录
-            else {
-                instruct_cd("../");
-            }
-        }
-
-        //new_dir == "./usr/user1/a/b/c/"
-        string new_dir = "./";
-        for (auto &dest_addr_split_items_iter: dest_addr_split_items) {
-            if (dest_addr_split_items_iter == "~") { continue; }
-            new_dir += dest_addr_split_items_iter;
-            new_dir += "/";
-        }
-        //回退后, ./ == /usr/
-        instruct_cd(new_dir);
     } else if (dest_addr_split_items.size() == 1 && dest_addr_split_items[0] == "~") {
         //dest_addr == "~/"
         //new_dir == "/home/user_name/"
@@ -254,7 +254,7 @@ void instruct_cd(const string &dest_addr) {
         new_dir += "/";
         instruct_cd(new_dir);
 
-    } else if (dest_addr_split_items.size() == 1 && dest_addr_split_items[0] != "..") {
+    } else if (dest_addr_split_items.size() == 1) {
         //dest_addr == "folder_name"
         //new_dir == "./folder_name/"
         string new_dir{};
