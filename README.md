@@ -26,7 +26,7 @@ memcpy(SFD, block, sizeof(SFD));
 | mkdir | 创建目录 √                      |
 | rmdir | 删除空目录 √                    |
 | cp    | 文件复制 ?w                     |
-| mv    | 改变文件名                      |
+| mv    | 改变文件名 √                    |
 | ln    | 建立文件链接                    |
 | chmod | 改变文件权限                    |
 | chown | 改变文件拥有者                  |
