@@ -113,6 +113,7 @@ void instruct_cd(const string &dest_addr) {
 
     string current_dir = user_mem[cur_user].cwd;
     vector<string> cwd_split_items;
+    cwd_split_items.push_back("/");     //根目录标识
     for (sregex_iterator iter(current_dir.begin(), current_dir.end(), re); iter != end; iter++) {
         //cout<<iter->str()<<endl;
         cwd_split_items.push_back(iter->str());
@@ -122,49 +123,49 @@ void instruct_cd(const string &dest_addr) {
     if (dest_addr_split_items.size() == 1 && dest_addr_split_items[0] == "..") {
         //dest_addr == ../
         if (cwd_split_items.size() == 1) {
-            cout << "previous directory not found when in root." << endl;
+            cout << "when in root, previous directory not found. " << endl;
             return;
         }
-        string fore_dir = cwd_split_items[cwd_split_items.size() - 2];
+        string cur_dir_name = cwd_split_items[cwd_split_items.size() - 1];
+        //删去当前目录的文件名
+        cwd_split_items.pop_back();
+        string fore_dir;
+        //构建新的,父目录的绝对路径
+        for (auto &dir_iter: cwd_split_items) {
+            fore_dir += "/";
+            fore_dir += dir_iter;
+        }
+        fore_dir += "/";
+
         //在当前用户打开文件中查找上级目录名
-        bool fore_dir_OFD_find_flag{false};
         for (auto &OFD_iter : user_mem[cur_user].OFD) {
+            // OFD_iter.file_name 为绝对路径
             if (OFD_iter.flag == 1 && OFD_iter.file_name == fore_dir) {
                 // 在函数内按INode.state判断是否需要将内存inode写回磁盘#3,并删除系统文件打开表的相应项
                 dinode_write(user_mem[cur_user].cur_dir->di_number);
-                //?????????????????????????????????????把这个循环提前到cwd_split_items被pop之前了
                 for (auto &curr_OFD_iter : user_mem[cur_user].OFD) {
                     if (curr_OFD_iter.file_name == cwd_split_items.back()) {
-                        curr_OFD_iter.flag = 0;         //????????????????????????????????????????????????????????????????????????????????
+                        curr_OFD_iter.flag = 0;
                         break;
                     }
                 }
-                string new_dir;
-                cwd_split_items.pop_back();
-                for (auto &dir_iter: cwd_split_items) {
-                    new_dir += "/";
-                    new_dir += dir_iter;
-                }
-                new_dir += "/";
                 // 更改当前工作目录, 更改当前工作目录的内存inode指针,
                 // 删除退出文件夹对应用户打开文件表OFD项, 用户打开文件计数--
-//                new_dir.copy(user_mem[cur_user].cwd, 100, 0);     //??????????????????????????????????????????????
-                strcpy(user_mem[cur_user].cwd, new_dir.c_str());
+                strcpy(user_mem[cur_user].cwd, fore_dir.c_str());
                 user_mem[cur_user].cur_dir = &sys_open_file[OFD_iter.inode_number];
                 user_mem[cur_user].file_count--;
-                fore_dir_OFD_find_flag = true;
                 break;
             }
         }
     }
-        //打开当前目录下的文件路径,不进行回退
+    //打开当前目录下的文件路径,不进行回退
     else if (dest_addr_split_items[0] == ".") {
         //dest_addr == "./a/b/c/"
         for (auto &dest_addr_split_items_iter : dest_addr_split_items) {
             if (dest_addr_split_items_iter == ".") { continue; }
-
-            string new_dir;
-            cwd_split_items.push_back(dest_addr_split_items_iter);
+                // 要进入的文件夹的绝对路径
+                    string new_dir;
+                    cwd_split_items.push_back(dest_addr_split_items_iter);
             for (auto &cwd_split_items_iter : cwd_split_items) {
                 new_dir += "/";
                 new_dir += cwd_split_items_iter;
@@ -180,12 +181,12 @@ void instruct_cd(const string &dest_addr) {
             // 按文件名查找目录inode对应block中存储的SFD, 找到dinode_num
             unsigned int cur_dir_open_dinode_num{0};
             for (auto &cur_dir_SFD_iter : cur_dir_SFD) {
-                if (cur_dir_SFD_iter.file_name == dest_addr_split_items_iter) {
+                if (cur_dir_SFD_iter.file_name == new_dir) {
                     cur_dir_open_dinode_num = cur_dir_SFD_iter.di_number;
                     break;
                 }
             }
-            //未从SFD中找到要打开的文件
+            //未从SFD中找到要打开的文件的绝对路径
             if (cur_dir_open_dinode_num == 0) {
                 cout << "file: " << new_dir << " not found" << endl;
                 return;
@@ -205,15 +206,12 @@ void instruct_cd(const string &dest_addr) {
             } else {
                 // 更改当前工作目录, 更改当前工作目录的内存inode指针,
                 // 增添进入文件夹对应用户打开文件表OFD项, 用户打开文件计数++
-//                new_dir.copy(user_mem[cur_user].cwd, new_dir.length(), 0);     //??????????????????????????????????????????????
                 strcpy(user_mem[cur_user].cwd, new_dir.c_str());
                 user_mem[cur_user].cur_dir = &inode;
                 user_mem[cur_user].file_count++;
                 for (auto &curr_OFD_iter : user_mem[cur_user].OFD) {
                     if (curr_OFD_iter.flag == 0) {
                         curr_OFD_iter.flag = 1;
-//                        dest_addr_split_items_iter.copy(curr_OFD_iter.file_name,
-//                                                        dest_addr_split_items_iter.length(), 0);     //??????????????????????????????????????????????
                         strcpy(curr_OFD_iter.file_name, dest_addr_split_items_iter.c_str());
                         curr_OFD_iter.inode_number = inode_num;
                         break;
@@ -221,18 +219,24 @@ void instruct_cd(const string &dest_addr) {
                 }
             }
         }
-    } else {
-        //dest_addr == "~/usr/user1/a/b/c/"
-        for (auto cwd_split_item_iter = cwd_split_items.rbegin(); //从后往前
-             cwd_split_item_iter != cwd_split_items.rend(); cwd_split_item_iter++) {
+    } else if (dest_addr[0] == '/') {
+        //dest_addr == "/usr/user1/a/b/c/"
+        /*
+        reverse(dest_addr_split_items.begin(), dest_addr_split_items.end());    //反转dest_addr_split_items
+        dest_addr_split_items.push_back("/");                                   //添加限定符
+        reverse(dest_addr_split_items.begin(), dest_addr_split_items.end());    //再转回来
+        */
+        reverse(cwd_split_items.begin(), cwd_split_items.end());    //反转cwd_split_items
+        for (auto cwd_split_item_iter : cwd_split_items) {
             //假设/usr/为根目录, 关闭文件夹知道到达用户所在文件夹的下一级,即根目录/usr/
-            if (*cwd_split_item_iter == "~") { break; }
+            if (cwd_split_item_iter == "/") { break; }
                 //如果不是根目录就返回上一级目录
             else {
                 instruct_cd("../");
             }
         }
 
+        //new_dir == "./usr/user1/a/b/c/"
         string new_dir = "./";
         for (auto &dest_addr_split_items_iter: dest_addr_split_items) {
             if (dest_addr_split_items_iter == "~") { continue; }
@@ -240,6 +244,23 @@ void instruct_cd(const string &dest_addr) {
             new_dir += "/";
         }
         //回退后, ./ == /usr/
+        instruct_cd(new_dir);
+    } else if(dest_addr_split_items.size() == 1 && dest_addr_split_items[0] == "~"){
+        //dest_addr == "~/"
+        //new_dir == "/home/user_name/"
+        string new_dir{};
+        new_dir += "/home/";
+        new_dir += user[cur_user].user_name;
+        new_dir += "/";
+        instruct_cd(new_dir);
+
+    } else if (dest_addr_split_items.size() == 1 && dest_addr_split_items[0] != "..") {
+        //dest_addr == "folder_name"
+        //new_dir == "./folder_name/"
+        string new_dir{};
+        new_dir += "./";
+        new_dir += dest_addr_split_items[0];
+        new_dir += "/";
         instruct_cd(new_dir);
     }
 }
