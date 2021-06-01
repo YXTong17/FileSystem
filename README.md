@@ -22,7 +22,7 @@ memcpy(SFD, block, sizeof(SFD));
 | read  | 读取文件内容 ?w                 |
 | write | 写入文件 ?w                     |
 | touch | 建立一个新的文件 / 改变读取时间 ?x |
-| rm    | 删除文件 ?t                      |
+| rm    | 删除文件 √t                      |
 | mkdir | 创建目录 √                      |
 | rmdir | 删除目录 ?t                      |
 | cp    | 文件复制 ?w                     |
