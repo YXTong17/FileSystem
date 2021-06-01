@@ -33,7 +33,7 @@ memcpy(SFD, block, sizeof(SFD));
 | chgrp | 改变文件所属组                  |
 | umod  | 文件创建权限码                  |
 | vim   | 编辑文件 ?x                     |
-| ????  | 写大文件                        |
+| ????  | 写大文件 ?x                     |
   
 ![系统or用户打开表结构图.png](https://i0.hdslb.com/bfs/album/4909cd5cb42187ccb2645cb3d2935628a4a2ee6a.png)  
 ![磁盘划分](https://i0.hdslb.com/bfs/album/d5f36bc2e460298b8a8682064b354c0a5f301d1b.png)  
