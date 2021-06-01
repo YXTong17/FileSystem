@@ -30,7 +30,7 @@ memcpy(SFD, block, sizeof(SFD));
 | cp    | 文件复制 ?w                     |
 | mv    | 改变文件名 √                    |
 | ln    | 建立文件链接                    |
-| chmod | 改变文件权限                    |
+| chmod | 改变文件权限 √                  |
 | chown | 改变文件拥有者                  |
 | chgrp | 改变文件所属组                  |
 | umod  | 文件创建权限码                  |
