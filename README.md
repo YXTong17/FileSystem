@@ -1,5 +1,6 @@
 ！！！！！！！！！！判断修改i节点的函数是否用到了dinode_rea();  
-freeblock
+freeblock  
+delete_file里相应的盘块写0  
   
 函数文件都起名为XXX.cpp  
 然后把相应的函数放到filesys.h中  
