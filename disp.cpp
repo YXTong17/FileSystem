@@ -2,48 +2,54 @@
 // Created by time on 2021/5/28.
 //
 
-#include "disp.h"
+#include "filesys.h"
+#include <iostream>
 
 void init_display() {
-    for (unsigned int &disp_po : disp_pos) {
-        disp_po = 0;
+    for (unsigned int i = 0; i < USER_NUM; i++) {
+        next_row_offset[i] = 0;
+        dream[i] = 0;
     }
 }
 
 void display(const char *p) { //输出字符串时会补满成整行
-    unsigned int pos = disp_pos[current_user_id];
-    char (*mem)[WIDTH] = disp_mem[current_user_id];
-    unsigned int row = pos / WIDTH; //当前行号
+    char (*mem)[WIDTH] = disp_mem[cur_user];
+    unsigned int row = (dream[cur_user] + next_row_offset[cur_user]) % HEIGHT; //当前行号
     //下面把字符串写到当前用户的缓冲区
-    while (*p != '\0') {
-        if (row >= HEIGHT)
-            break;
-        char *disp_row=mem[row]; //指向显存的row行
-        while(*p!='\0' && disp_row!=mem[row]+WIDTH){ //写一行
-            *disp_row++=*p++;
-            pos++;
+    int k = 0;
+    while (p[k] != '\0') {
+        char *disp_row = mem[row]; //指向显存的row行
+        for (int i = 0; i < WIDTH; i++)
+            disp_row[i] = ' ';
+        for (int i = 0; p[k] != '\0' && i < WIDTH; i++) //写一行
+            disp_row[i] = p[k++];
+        next_row_offset[cur_user]++;
+        if (next_row_offset[cur_user] >= HEIGHT) {
+            dream[cur_user]++;
+            dream[cur_user] %= HEIGHT;
+            next_row_offset[cur_user]--;
         }
-        row = pos / WIDTH;
+        row = (dream[cur_user] + next_row_offset[cur_user]) % HEIGHT;
     }
-    //字符串写完了，下面让disp_pos指向下一空行
-    disp_pos[current_user_id]=((pos-1)/WIDTH+1)*WIDTH;
 }
 
-void flush(){
+void flush() {
     system("cls");
-    char (*mem)[WIDTH] = disp_mem[current_user_id];
-    unsigned int i=0; //作为刷新页面的光标
-    unsigned int pos=disp_pos[current_user_id];
-    unsigned int row = i / WIDTH; //当前行号
-    cout<<pos<<endl;
-    while (i<pos){
-        if (row >= HEIGHT)
-            break;
-        char *disp_row=mem[row]; //指向显存的row行
-        for(int j=0;j<WIDTH && i<pos;j++,i++){
-            cout<<disp_row[j];
+    char (*mem)[WIDTH] = disp_mem[cur_user];
+    unsigned int i = 0; //作为刷新页面的光标行号
+    unsigned int row = dream[cur_user]; //当前行号
+    while (i < next_row_offset[cur_user]) {
+        char *disp_row = mem[row]; //指向显存的row行
+        for (int j = 0; j < WIDTH; j++) { //按行刷新
+            cout << disp_row[j];
         }
-        cout<<endl;
-        row = i / WIDTH;
+        cout << endl;
+        i++;
+        row = (dream[cur_user] + i) % HEIGHT;
     }
+}
+
+void clear() {
+    next_row_offset[cur_user] = 0;
+    dream[cur_user] = 0;
 }
