@@ -34,7 +34,7 @@ void DISK_ALLOCATE::restore_super_block() {
     vector<unsigned int> block_item;
     char block_content[BLOCK_SIZE]{0};
     string str_temp;
-    disk_read_d(block_content, block_num);
+    disk_read(block_content, block_num);
     str_temp = block_content;
     regex re("\\d+");
     sregex_iterator end;
@@ -53,7 +53,7 @@ void DISK_ALLOCATE::store_super_block(int insert_block_num) {
         str_temp += ' ';
     }
     str_temp.copy(insert_block, str_temp.length(), 0);
-    disk_write_d(insert_block, insert_block_num);
+    disk_write(insert_block, insert_block_num);
 }
 
 void DISK_ALLOCATE::free_block(int block_num) {
@@ -82,7 +82,7 @@ unsigned int DISK_ALLOCATE::allocate_block() {
             vector<unsigned int> block_item;
             char block_content[BLOCK_SIZE]{0};
             string str_temp;
-            disk_read_d(block_content, (int) block_num);
+            disk_read(block_content, (int) block_num);
             str_temp = block_content;
             regex re("\\d+");
             sregex_iterator end;
