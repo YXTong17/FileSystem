@@ -1,5 +1,6 @@
 #include "filesys.h"
 #include <iostream>
+#include <cstring>
 
 FILE *fp;
 bitset<DINODE_COUNT> bitmap;
@@ -17,13 +18,18 @@ DISK_ALLOCATE disk;
 unsigned short cur_user;         //当前用户ID
 unsigned short umod;             //默认权限码，默认644，目录644+111=755
 
+char disp_mem[USER_NUM][HEIGHT][WIDTH];
+unsigned int next_row_offset[USER_NUM];
+unsigned int dream[USER_NUM];
+
+char clipboard[BLOCK_SIZE] = {0};
+struct DINode i_1 = {};
+//bool is_clipboard_s_link = false;
+
 int main() {
-    init();
-//    for (int i = 0; i < 19; i++)
-//        creat_directory((char *) "abc");
-    ls();
+    welcome();
+    /*  必须放在最后的函数  */
     store();
-    // 必须放在最后的两个函数
     all_write_back();
     fclose(fp);
 //    system("pause");
