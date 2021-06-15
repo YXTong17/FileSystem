@@ -64,8 +64,9 @@ void write(const char *buf, int k) { //把buf内容写到k缓冲块中
 
 void write_back(int k) { //把第k缓冲块写回磁盘的tag[k]块,若错误则返回-1，否则返回1
     int id = tag[k];
-    if (id < 0)
+    if (id < 0 or id > DISK_BLK - 1) {
         return;
+    }
     fseek(fp, id * BLOCK_SIZE, 0);
     char *p1 = disk_buf[k];
     fwrite(p1, BLOCK_SIZE, 1, fp);
@@ -79,9 +80,12 @@ void read_from(int k, int id) { //把id磁盘块的内容读到第k个缓冲块
 
 void all_write_back() {
     for (int i = 0; i < DISK_BUF; i++) {
-        write_back(i);
+        int id = tag[i];
+        if (id < 0 or id > DISK_BLK - 1) {}
+        else write_back(i);
     }
 }
+
 
 int get_empty() {
     //目前暂时全部把第0块作为置换块
